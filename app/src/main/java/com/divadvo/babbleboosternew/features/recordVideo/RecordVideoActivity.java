@@ -28,6 +28,9 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 
+/**
+ *
+ */
 public class RecordVideoActivity extends BaseActivity implements RecordVideoMvpView {
     public static final String EXTRA_PHONEME = "EXTRA_PHONEME";
     public static final String EXTRA_TEST = "EXTRA_TEST";
@@ -95,6 +98,7 @@ public class RecordVideoActivity extends BaseActivity implements RecordVideoMvpV
                 .showPortraitWarning(false)
                 .defaultToFrontFacing(true)
                 .videoPreferredAspect(16f / 9f)
+                .iconStop(R.drawable.ic_stop_recording)
                 .retryExits(false)
                 .autoRecordWithDelayMs(10) //100
                 .countdownSeconds(90f) // max length of video is 90 seconds

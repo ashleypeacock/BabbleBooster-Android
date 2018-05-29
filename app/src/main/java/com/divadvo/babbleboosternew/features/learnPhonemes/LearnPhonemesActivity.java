@@ -33,7 +33,12 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 
+
+/**
+ * Learn the phenomes, this is the play section.
+ */
 public class LearnPhonemesActivity extends BaseActivity implements LearnPhonemesMvpView {
+
     public static final String EXTRA_PHONEME = "EXTRA_PHONEME";
     public static final String GO_TO_FINAL_VIDEO = "GO_TO_FINAL_VIDEO";
 

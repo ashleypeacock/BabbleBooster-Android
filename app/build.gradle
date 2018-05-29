@@ -6,7 +6,7 @@ apply plugin: 'io.fabric'
 
 android {
     compileSdkVersion 27
-    buildToolsVersion '27.0.0'
+    buildToolsVersion '27.0.3'
 
     dexOptions {
         maxProcessCount 4
@@ -48,6 +48,7 @@ android {
     }
 
     lintOptions {
+        abortOnError false
         textOutput "stdout"
         textReport true
         checkAllWarnings true
@@ -131,12 +132,15 @@ dependencies {
     testImplementation unitTestLibs
     androidTestImplementation androidTestsLibs
 
-    compile 'com.snatik:storage:2.1.0'
-    compile 'com.afollestad:material-camera:0.4.4'
-    implementation 'com.afollestad.material-dialogs:core:0.9.6.0'
-    compile 'com.synnapps:carouselview:0.1.4'
+    implementation 'com.snatik:storage:2.1.0'
+    implementation 'com.afollestad:material-camera:0.4.4'
 
-    compile('com.crashlytics.sdk.android:crashlytics:2.7.1@aar') {
+    implementation group: 'io.fabric.sdk.android', name: 'fabric', version: '1.4.3'
+
+    implementation 'com.afollestad.material-dialogs:core:0.9.6.0'
+    implementation 'com.synnapps:carouselview:0.1.4'
+
+    implementation('com.crashlytics.sdk.android:crashlytics:2.7.1@aar') {
         transitive = true
     }
 
