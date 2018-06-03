@@ -21,6 +21,9 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 
+/**
+ * Test phenomes.
+ */
 public class TestChooseActivity extends BaseActivity implements TestChooseMvpView {
 
     @Inject
@@ -60,10 +63,11 @@ public class TestChooseActivity extends BaseActivity implements TestChooseMvpVie
 
             int numberOfAttemptsRemaining = testChoosePresenter.calculateNumberOfAttemptsRemaining(phoneme);
 
-            String buttonText = String.format("%s %d", phoneme, numberOfAttemptsRemaining); // \n
+            String buttonText = String.format("%s", phoneme); // \n
             boolean buttonEnabled = numberOfAttemptsRemaining > 0;
 
             Button button = new Button(this);
+            button.setAllCaps(false);
             button.setText(buttonText);
             button.setEnabled(buttonEnabled);
             button.setTextSize(36);

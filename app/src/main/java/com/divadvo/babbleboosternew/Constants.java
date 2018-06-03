@@ -14,6 +14,6 @@ public interface Constants {
     int MIN_NUMBER_ATTEMPTS_ENOUGH_PER_DAY = 4;
     double MIN_GOOD_AVERAGE_PER_DAY = 75.0;
 
-    int NUMBER_OF_TEST_ATTEMPTS_PER_PHONEME = 3;
+    int NUMBER_OF_TEST_ATTEMPTS_PER_PHONEME = 1;
 
 }

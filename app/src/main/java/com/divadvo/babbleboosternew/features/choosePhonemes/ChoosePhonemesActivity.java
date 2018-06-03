@@ -62,6 +62,7 @@ public class ChoosePhonemesActivity extends BaseActivity implements ChoosePhonem
 
             Button button = new Button(this);
             button.setText(phoneme);
+            button.setAllCaps(false);
             button.setTextSize(36);
             button.setOnClickListener(buttonClickListener);
 
