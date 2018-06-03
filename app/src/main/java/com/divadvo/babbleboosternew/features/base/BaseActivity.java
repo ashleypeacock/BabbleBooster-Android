@@ -35,6 +35,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     private long activityId;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

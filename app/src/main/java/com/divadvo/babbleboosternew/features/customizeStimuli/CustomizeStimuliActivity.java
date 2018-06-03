@@ -8,7 +8,9 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.content.FileProvider;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,7 +27,10 @@ import com.divadvo.babbleboosternew.features.base.BaseActivity;
 import com.divadvo.babbleboosternew.injection.component.ActivityComponent;
 
 import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -37,6 +42,8 @@ public class CustomizeStimuliActivity extends BaseActivity implements CustomizeS
     public static final String EXTRA_PHONEME = "EXTRA_PHONEME";
     private static int FILE_IMAGE = 98;
     private static int FILE_VIDEO = 99;
+    static final int REQUEST_IMAGE_CAPTURE = 5;
+
 
     @Inject
     CustomizeStimuliPresenter customizeStimuliPresenter;
@@ -53,6 +60,7 @@ public class CustomizeStimuliActivity extends BaseActivity implements CustomizeS
     private String phoneme;
     private List<File> imageFilesToDisplay;
     private List<File> videosToDisplay;
+    private String mCurrentPhotoPath;
 
     public static Intent getStartIntent(Context context, String phoneme) {
         Intent intent = new Intent(context, CustomizeStimuliActivity.class);
@@ -207,9 +215,10 @@ public class CustomizeStimuliActivity extends BaseActivity implements CustomizeS
 
     @OnClick(R.id.buttonAddImage)
     void addNewImageClick() {
-        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        dispatchTakePictureIntent();
+//        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+//        startActivityForResult(Intent.createChooser(intent, "Select Image"), FILE_IMAGE);
 //        intent.setType("image/* video/*");
-        startActivityForResult(Intent.createChooser(intent, "Select Image"), FILE_IMAGE);
     }
 
     @OnClick(R.id.buttonAddVideo)
@@ -220,12 +229,19 @@ public class CustomizeStimuliActivity extends BaseActivity implements CustomizeS
         startActivityForResult(Intent.createChooser(intent, "Select Video"), FILE_IMAGE);
     }
 
+
+
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         shouldCheckCredentials = false;
         super.onActivityResult(requestCode, resultCode, data);
         shouldCheckCredentials = false;
 
-        if (resultCode == RESULT_OK) {
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            File photoFile = new File(mCurrentPhotoPath);
+            File stimuliFile = customizeStimuliPresenter.getStimuliFileFromExternal(phoneme, photoFile);
+            customizeStimuliPresenter.copyFile(photoFile, stimuliFile);
+            reloadImagesAndVideos();
+        } else if (resultCode == RESULT_OK) {
             Uri selectedImageUri = data.getData();
             String selectedPath = getPath(selectedImageUri);
             File file = new File(selectedPath);
@@ -238,6 +254,45 @@ public class CustomizeStimuliActivity extends BaseActivity implements CustomizeS
                 }
             }
         }
+    }
+
+
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+
+            } catch (IOException ex) {
+                Toast.makeText(this, "Failed to take photo", Toast.LENGTH_LONG).show();
+            }
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                Uri photoURI = FileProvider.getUriForFile(this,
+                        "com.divadvo.babbleboosternew.provider",
+                        photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+            }
+        }
+    }
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,
+                ".jpg",
+                storageDir
+        );
+
+        mCurrentPhotoPath = image.getAbsolutePath();
+
+        // Save a file: path for use with ACTION_VIEW intents
+        return image;
     }
 
     private void addNewImage(File file) {
