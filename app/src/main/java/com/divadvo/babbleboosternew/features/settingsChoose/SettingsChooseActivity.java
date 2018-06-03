@@ -74,6 +74,7 @@ public class SettingsChooseActivity extends BaseActivity implements SettingsChoo
             Button button = new Button(this);
             button.setText(phoneme);
             button.setTextSize(24);
+            button.setAllCaps(false);
             button.setOnClickListener(buttonClickListener);
 
             linearLayout.addView(button, layoutParams);
