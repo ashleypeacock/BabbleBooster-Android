@@ -19,6 +19,11 @@ public class TestChoosePresenter extends BasePresenter<TestChooseMvpView> {
     }
 
     public int calculateNumberOfAttemptsRemaining(String phoneme) {
-        return dbManager.calculateNumberOfAttemptsRemaining(phoneme);
+        int numberOfAttemptsRemaining = dbManager.calculateNumberOfAttemptsRemaining(phoneme);
+
+        if(numberOfAttemptsRemaining < 0) // we've changed this so we don't want incorrect numbers in the database
+            numberOfAttemptsRemaining = 0;
+
+        return numberOfAttemptsRemaining;
     }
 }
