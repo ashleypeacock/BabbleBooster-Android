@@ -4,38 +4,25 @@ package com.divadvo.babbleboosternew.data.firebase;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Handler;
-import android.support.annotation.NonNull;
 
 import com.divadvo.babbleboosternew.Constants;
 import com.divadvo.babbleboosternew.data.local.Attempt;
 import com.divadvo.babbleboosternew.data.local.DbManager;
 import com.divadvo.babbleboosternew.data.local.LocalUser;
-import com.divadvo.babbleboosternew.data.local.RealmAttempt;
+import com.divadvo.babbleboosternew.data.local.Session;
 import com.divadvo.babbleboosternew.data.local.StorageHelper;
-import com.divadvo.babbleboosternew.features.lock.LockActivity;
 import com.divadvo.babbleboosternew.features.lock.LockMvpView;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
-import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.snatik.storage.Storage;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +31,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import io.realm.RealmResults;
 import timber.log.Timber;
 
 @Singleton
@@ -224,6 +210,42 @@ public class FirebaseSyncHelper {
         uploadMastered();
     }
 
+    private void uploadSessions() {
+        CollectionReference collectionAttempts = db.collection("sessions").document(LocalUser.getInstance().username).collection("sessions");
+
+        List<Session> sessionsInDatabase = new ArrayList<>();
+
+        collectionAttempts.get().addOnCompleteListener(task -> {
+
+            if (task.isSuccessful()) {
+                List<Session> allAttemptsBefore = dbManager.getAllSessionsFromRealm();
+                for (DocumentSnapshot document : task.getResult()) {
+
+                    Session session = document.toObject(Session.class);
+                    sessionsInDatabase.add(session);
+
+                    // If not in local database, save it
+                    if(!allAttemptsBefore.contains(session)) {
+                        dbManager.saveSession(session);
+                    }
+                }
+
+
+                List<Session> allAttempts = dbManager.getAllSessionsFromRealm();
+                // Upload not existent
+                for(Session session : allAttempts) {
+                    // Skip if already uploaded
+                    if(sessionsInDatabase.contains(session))
+                        continue;
+
+                    collectionAttempts.add(session);
+                }
+            } else {
+                Timber.d("Error getting documents: ", task.getException());
+            }
+        });
+    }
+
     private void uploadDatabase() {
 //        progressView.displayStatus("Uploading results");
 
@@ -233,11 +255,9 @@ public class FirebaseSyncHelper {
 
         List<Attempt> attemptsInDatabase = new ArrayList<>();
 
-        collectionAttempts
-        .get()
-        .addOnCompleteListener(task -> {
+        collectionAttempts.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                List<Attempt> allAttemptsBefore = dbManager.getAllAttempts();
+                List<Attempt> allAttemptsBefore = dbManager.getAllAttemptsFromRealm();
                 for (DocumentSnapshot document : task.getResult()) {
                     Attempt attempt = document.toObject(Attempt.class);
                     attemptsInDatabase.add(attempt);
@@ -250,7 +270,7 @@ public class FirebaseSyncHelper {
                 }
 
 
-                List<Attempt> allAttempts = dbManager.getAllAttempts();
+                List<Attempt> allAttempts = dbManager.getAllAttemptsFromRealm();
                 // Upload not existent
                 for(Attempt attempt : allAttempts) {
                     // Skip if already uploaded
@@ -344,8 +364,6 @@ public class FirebaseSyncHelper {
             tasksToF.decrementAndGet();
             progressView.displayStatus(tasksToF.get());
         }, i * 1000);
-
-
 
     }
 }

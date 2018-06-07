@@ -52,6 +52,23 @@ public class DbManager {
         }
     }
 
+    public void saveSession(Session session) {
+        realm.beginTransaction();
+
+//        if(attempt.isTest()) {
+//            TestAttemptRealm testAttemptRealm = attempt.getTestAttemptRealm();
+//            realm.copyToRealm(testAttemptRealm);
+//        } else {
+//            AttemptRealm attemptRealm = attempt.getAttemptRealm();
+//            realm.copyToRealm(attemptRealm);
+//        }
+
+        RealmSession realmSession = session.generateRealmSession();
+        realm.copyToRealm(realmSession);
+
+        realm.commitTransaction();
+    }
+
     public void saveAttempt(Attempt attempt) {
         realm.beginTransaction();
 
@@ -68,6 +85,10 @@ public class DbManager {
 
         realm.commitTransaction();
 
+    }
+
+    public RealmResults<RealmSession> getAllRealmSessions() {
+        return realm.where(RealmSession.class).findAll();
     }
 
     public RealmResults<RealmAttempt> getAllRealmAttempts() {
@@ -89,8 +110,20 @@ public class DbManager {
         return list;
     }
 
+    private List<Session> convertRealmSessionsToSessions(RealmResults<RealmSession> realmAttempts) {
+        List<Session> list = new ArrayList<>();
+        for (RealmSession realmAttempt : realmAttempts) {
+            list.add(realmAttempt.generateSession());
+        }
+        return list;
+    }
 
-    public List<Attempt> getAllAttempts() {
+    public List<Session> getAllSessionsFromRealm() {
+        return convertRealmSessionsToSessions(getAllRealmSessions());
+    }
+
+
+    public List<Attempt> getAllAttemptsFromRealm() {
         return convertRealmAttemptsToAttempts(getAllRealmAttempts());
     }
 

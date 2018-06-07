@@ -23,12 +23,13 @@ public class DataManager {
     }
 
     public Single<List<String>> getPokemonList(int limit) {
-        return pokemonService
+        Single<List<String>> list = pokemonService
                 .getPokemonList(limit)
                 .toObservable()
                 .flatMapIterable(namedResources -> namedResources.results)
                 .map(namedResource -> namedResource.name)
                 .toList();
+        return list;
     }
 
     public Single<Pokemon> getPokemon(String name) {
