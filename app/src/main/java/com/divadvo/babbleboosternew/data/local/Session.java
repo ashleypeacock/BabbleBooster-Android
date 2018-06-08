@@ -4,14 +4,20 @@ public class Session {
 
     long sessionStart;
     long sessionLength;
+    String screenName;
 
-    public Session(long sessionStart, long sessionLength) {
+    public Session(long sessionStart, long sessionLength, String screenName) {
         this.sessionStart = sessionStart;
         this.sessionLength = sessionLength;
+        this.screenName = screenName;
+    }
+
+    public Session() {
+
     }
 
     public RealmSession generateRealmSession() {
-        return new RealmSession(sessionStart, sessionLength);
+        return new RealmSession(sessionStart, sessionLength, screenName);
     }
 
     @Override

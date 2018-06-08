@@ -15,6 +15,8 @@ import android.widget.VideoView;
 
 import com.bumptech.glide.Glide;
 import com.divadvo.babbleboosternew.R;
+import com.divadvo.babbleboosternew.data.local.DbManager;
+import com.divadvo.babbleboosternew.data.local.Session;
 import com.divadvo.babbleboosternew.data.local.StorageHelper;
 import com.divadvo.babbleboosternew.features.base.BaseActivity;
 import com.divadvo.babbleboosternew.features.choosePhonemes.ChoosePhonemesMvpView;
@@ -45,6 +47,8 @@ public class LearnPhonemesActivity extends BaseActivity implements LearnPhonemes
     @Inject
     LearnPhonemesPresenter learnPhonemesPresenter;
 
+    @Inject
+    DbManager dbManager;
 
     @BindView(R.id.image_phoneme)
     ImageView phonemeImage;
@@ -71,6 +75,7 @@ public class LearnPhonemesActivity extends BaseActivity implements LearnPhonemes
     Storage storage;
 
     String phonemeDirectoryPath;
+
 
     public static Intent getStartIntent(Context context, String phoneme, boolean goToFinalVideo) {
         Intent intent = new Intent(context, LearnPhonemesActivity.class);
@@ -296,6 +301,12 @@ public class LearnPhonemesActivity extends BaseActivity implements LearnPhonemes
         }
     }
 
+    @Override
+    protected void onPause() {
+        //learnPhonemesPresenter.addSession(startTime);
+//        dbManager.saveSession(new Session(startTime, System.currentTimeMillis() - startTime));
+        super.onPause();
+    }
 
     @Override
     public int getLayout() {

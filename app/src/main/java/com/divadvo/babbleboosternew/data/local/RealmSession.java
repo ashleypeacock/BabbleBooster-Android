@@ -7,10 +7,12 @@ public class RealmSession extends RealmObject {
 
     long sessionStart;
     long sessionLength;
+    String className;
 
-    public RealmSession(long sessionStart, long sessionLength) {
+    public RealmSession(long sessionStart, long sessionLength, String className) {
         this.sessionStart = sessionStart;
         this.sessionLength = sessionLength;
+        this.className = className;
     }
 
     public RealmSession() {
@@ -34,6 +36,6 @@ public class RealmSession extends RealmObject {
     }
 
     public Session generateSession() {
-        return new Session(sessionStart, sessionLength);
+        return new Session(sessionStart, sessionLength, className);
     }
 }

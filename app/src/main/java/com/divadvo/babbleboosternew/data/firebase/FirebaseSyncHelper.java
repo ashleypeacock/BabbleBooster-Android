@@ -204,14 +204,13 @@ public class FirebaseSyncHelper {
 
 
     private void downloadDatabase() {
-        // Then
-
         uploadDatabase();
         uploadMastered();
+        uploadSessions();
     }
 
     private void uploadSessions() {
-        CollectionReference collectionAttempts = db.collection("sessions").document(LocalUser.getInstance().username).collection("sessions");
+        CollectionReference collectionAttempts = db.collection("session").document(LocalUser.getInstance().username).collection("sessions");
 
         List<Session> sessionsInDatabase = new ArrayList<>();
 

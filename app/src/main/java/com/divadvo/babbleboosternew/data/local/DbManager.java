@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.realm.Realm;
+import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
@@ -29,6 +30,10 @@ public class DbManager {
     @Inject
     public DbManager(Context context) {
         Realm.init(context);
+        RealmConfiguration config = new RealmConfiguration
+                .Builder()
+                .deleteRealmIfMigrationNeeded()
+                .build();
         realm = Realm.getDefaultInstance();
     }
 
@@ -71,14 +76,6 @@ public class DbManager {
 
     public void saveAttempt(Attempt attempt) {
         realm.beginTransaction();
-
-//        if(attempt.isTest()) {
-//            TestAttemptRealm testAttemptRealm = attempt.getTestAttemptRealm();
-//            realm.copyToRealm(testAttemptRealm);
-//        } else {
-//            AttemptRealm attemptRealm = attempt.getAttemptRealm();
-//            realm.copyToRealm(attemptRealm);
-//        }
 
         RealmAttempt realmAttempt = attempt.generateRealmAttempt();
         realm.copyToRealm(realmAttempt);

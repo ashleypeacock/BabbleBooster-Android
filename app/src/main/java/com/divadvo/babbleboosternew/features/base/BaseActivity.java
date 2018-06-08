@@ -11,11 +11,15 @@ import java.util.concurrent.atomic.AtomicLong;
 import butterknife.ButterKnife;
 
 import com.divadvo.babbleboosternew.MvpStarterApplication;
+import com.divadvo.babbleboosternew.data.local.DbManager;
+import com.divadvo.babbleboosternew.data.local.Session;
 import com.divadvo.babbleboosternew.features.lock.LockActivity;
 import com.divadvo.babbleboosternew.injection.component.ActivityComponent;
 import com.divadvo.babbleboosternew.injection.component.ConfigPersistentComponent;
 import com.divadvo.babbleboosternew.injection.component.DaggerConfigPersistentComponent;
 import com.divadvo.babbleboosternew.injection.module.ActivityModule;
+
+import javax.inject.Inject;
 
 import timber.log.Timber;
 
@@ -34,6 +38,11 @@ public abstract class BaseActivity extends AppCompatActivity {
             new LongSparseArray<>();
 
     private long activityId;
+
+    protected long startTime = 0;
+
+    @Inject
+    DbManager dbManager;
 
 
     @Override
@@ -60,8 +69,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             Timber.i("Reusing ConfigPersistentComponent id=%d", activityId);
             configPersistentComponent = componentsArray.get(activityId);
         }
-        ActivityComponent activityComponent =
-                configPersistentComponent.activityComponent(new ActivityModule(this));
+        ActivityComponent activityComponent = configPersistentComponent.activityComponent(new ActivityModule(this));
         inject(activityComponent);
         attachView();
     }
@@ -115,8 +123,11 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         shouldCheckCredentials = true;
+        Session s = new Session(startTime, System.currentTimeMillis() - startTime, this.getLocalClassName());
+        dbManager.saveSession(s);
         super.onPause();
     }
+
 
     @Override
     protected void onResume() {
@@ -124,6 +135,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             startActivityForResult(LockActivity.getStartIntent(this), REQUEST_CODE);
             finish();
         }
+        startTime = System.currentTimeMillis();
         super.onResume();
     }
 
