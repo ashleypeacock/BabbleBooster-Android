@@ -1,6 +1,8 @@
 package com.divadvo.babbleboosternew.features.customizeStimuli;
 
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -10,7 +12,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.content.FileProvider;
+import android.support.v7.app.AlertDialog;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -213,19 +217,23 @@ public class CustomizeStimuliActivity extends BaseActivity implements CustomizeS
         reloadImagesAndVideos();
     }
 
+    void addImageFromCamera() {
+        dispatchTakePictureIntent();
+    }
+
     @OnClick(R.id.buttonAddImage)
     void addNewImageClick() {
-        dispatchTakePictureIntent();
 //        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 //        startActivityForResult(Intent.createChooser(intent, "Select Image"), FILE_IMAGE);
 //        intent.setType("image/* video/*");
+        showDialog();
     }
 
     @OnClick(R.id.buttonAddVideo)
     void addNewVideoClick() {
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
-//        intent.setType("image/* video/*");
-//        intent.setType("video/mp4");
+        intent.setType("image/* video/*");
+        intent.setType("video/mp4");
         startActivityForResult(Intent.createChooser(intent, "Select Video"), FILE_IMAGE);
     }
 
@@ -343,4 +351,24 @@ public class CustomizeStimuliActivity extends BaseActivity implements CustomizeS
         } else
             return null;
     }
+
+    public void showDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.pick_photo_method)
+                .setItems(R.array.photo_method, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        if(which == 0) {
+                            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
+                            intent.setType("image/* video/*");
+                            intent.setType("video/mp4");
+                            startActivityForResult(Intent.createChooser(intent, "Select Video"), FILE_IMAGE);
+                        } else {
+                            dispatchTakePictureIntent();
+                        }
+                    }
+                });
+        builder.create();
+        builder.show();
+    }
+
 }

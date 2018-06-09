@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="photo_method">
+        <item>Add from Gallery</item>
+        <item>Add from Camera</item>
+    </string-array>
+</resources>

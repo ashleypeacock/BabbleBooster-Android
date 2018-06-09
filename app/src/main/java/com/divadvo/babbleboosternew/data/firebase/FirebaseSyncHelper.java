@@ -4,6 +4,7 @@ package com.divadvo.babbleboosternew.data.firebase;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Handler;
+import android.util.Log;
 
 import com.divadvo.babbleboosternew.Constants;
 import com.divadvo.babbleboosternew.data.local.Attempt;
@@ -135,7 +136,10 @@ public class FirebaseSyncHelper {
                 progressView.displayStatus(tasksToF.get());
 //                tasks.remove(gsFileLocation);
                 // Local temp file has been created
-            }).addOnFailureListener(Timber::e);
+            }).addOnFailureListener(exception -> {
+                Timber.e(exception);
+                Log.e("Error", "downloadFile: " + fileLocation + ", " + fileName, exception);
+            });
         }
 
     }

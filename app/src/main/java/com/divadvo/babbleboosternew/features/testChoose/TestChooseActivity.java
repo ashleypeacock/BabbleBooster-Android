@@ -52,7 +52,7 @@ public class TestChooseActivity extends BaseActivity implements TestChooseMvpVie
     }
 
     private void generateButtons() {
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1.0f);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 150, 1.0f);
         layoutParams.setMargins(24, 0, 24, 0);
         ButtonClickListener buttonClickListener = new ButtonClickListener();
 
@@ -66,14 +66,17 @@ public class TestChooseActivity extends BaseActivity implements TestChooseMvpVie
             String buttonText = String.format("%s", phoneme); // \n
             boolean buttonEnabled = numberOfAttemptsRemaining > 0;
 
-            Button button = new Button(this);
-            button.setAllCaps(false);
-            button.setText(buttonText);
-            button.setEnabled(buttonEnabled);
-            button.setTextSize(36);
-            button.setOnClickListener(buttonClickListener);
+            if(buttonEnabled) {
 
-            linearLayout.addView(button, layoutParams);
+                Button button = new Button(this);
+                button.setAllCaps(false);
+                button.setText(buttonText);
+                button.setEnabled(buttonEnabled);
+                button.setTextSize(36);
+                button.setOnClickListener(buttonClickListener);
+                linearLayout.addView(button, layoutParams);
+            }
+
             i++;
         }
     }
