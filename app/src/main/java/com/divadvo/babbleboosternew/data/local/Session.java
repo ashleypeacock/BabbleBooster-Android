@@ -2,9 +2,33 @@ package com.divadvo.babbleboosternew.data.local;
 
 public class Session {
 
-    long sessionStart;
-    long sessionLength;
-    String screenName;
+    public long getSessionStart() {
+        return sessionStart;
+    }
+
+    public void setSessionStart(long sessionStart) {
+        this.sessionStart = sessionStart;
+    }
+
+    public long getSessionLength() {
+        return sessionLength;
+    }
+
+    public void setSessionLength(long sessionLength) {
+        this.sessionLength = sessionLength;
+    }
+
+    public String getScreenName() {
+        return screenName;
+    }
+
+    public void setScreenName(String screenName) {
+        this.screenName = screenName;
+    }
+
+    public long sessionStart;
+    public long sessionLength;
+    public String screenName;
 
     public Session(long sessionStart, long sessionLength, String screenName) {
         this.sessionStart = sessionStart;

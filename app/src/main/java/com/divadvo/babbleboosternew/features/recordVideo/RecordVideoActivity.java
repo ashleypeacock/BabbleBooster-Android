@@ -2,8 +2,11 @@ package com.divadvo.babbleboosternew.features.recordVideo;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -27,6 +30,7 @@ import java.io.File;
 import javax.inject.Inject;
 
 import butterknife.BindView;
+import butterknife.OnClick;
 
 /**
  *
@@ -46,6 +50,9 @@ public class RecordVideoActivity extends BaseActivity implements RecordVideoMvpV
 
     @BindView(R.id.button_no_new)
     Button btnNo;
+
+    @BindView(R.id.button_review_video)
+    Button btnReplay;
 
     @BindView(R.id.video_view_record)
     VideoView videoView;
@@ -79,6 +86,21 @@ public class RecordVideoActivity extends BaseActivity implements RecordVideoMvpV
         btnNo.setOnClickListener(buttonClickListener);
 
         startCamera();
+    }
+
+    @OnClick(R.id.button_review_video)
+    void onReviewVideo() {
+        videoView.start();
+
+        findViewById(R.id.button_review_video).getBackground().setColorFilter(Color.RED, PorterDuff.Mode.MULTIPLY);
+
+
+        videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mediaPlayer) {
+                findViewById(R.id.button_review_video).getBackground().setColorFilter(getResources().getColor(R.color.accent), PorterDuff.Mode.MULTIPLY);
+            }
+        });
     }
 
     /**
@@ -153,6 +175,7 @@ public class RecordVideoActivity extends BaseActivity implements RecordVideoMvpV
         btnYes.setVisibility(View.GONE);
         btnAttempt.setVisibility(View.GONE);
         btnNo.setVisibility(View.GONE);
+        btnReplay.setVisibility(View.GONE);
 
         performActionAfterResponse(response);
     }

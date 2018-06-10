@@ -14,4 +14,5 @@ public interface LockMvpView extends MvpView {
 
     void tryStartingHomeButWaitUntilFinished();
 
+    void displayMessage(String errorWithUserDetails);
 }

@@ -225,6 +225,7 @@ public class FirebaseSyncHelper {
                 for (DocumentSnapshot document : task.getResult()) {
 
                     Session session = document.toObject(Session.class);
+
                     sessionsInDatabase.add(session);
 
                     // If not in local database, save it

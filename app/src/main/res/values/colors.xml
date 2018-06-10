@@ -20,6 +20,8 @@
     <color name="divider">#BDBDBD</color>
     <color name="white">#FFFFFF</color>
 
+    <color name="dark_red">#A93226</color>
+
     <color name="primaryColor">#1a237e</color>
     <color name="primaryLightColor">#534bae</color>
     <color name="primaryDarkColor">#000051</color>

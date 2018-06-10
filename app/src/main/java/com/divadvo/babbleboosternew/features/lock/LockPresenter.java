@@ -1,5 +1,7 @@
 package com.divadvo.babbleboosternew.features.lock;
 
+import android.widget.Toast;
+
 import com.divadvo.babbleboosternew.data.local.LocalUser;
 import com.divadvo.babbleboosternew.data.local.PreferencesHelper;
 import com.divadvo.babbleboosternew.data.local.User;
@@ -82,9 +84,16 @@ public class LockPresenter extends BasePresenter<LockMvpView> {
                 // ie the password was correct
                 if (document != null && document.exists()) {
                     Timber.d("DocumentSnapshot data: " + task.getResult().getData());
-                    User user = document.toObject(User.class);
-                    // Save user in local preferences
-                    preferencesHelper.saveUser(user);
+
+                    try {
+                        User user = document.toObject(User.class);
+                        // Save user in local preferences
+                        preferencesHelper.saveUser(user);
+                    }catch (Exception e) {
+                        getView().displayMessage("Error with user details");
+//                        throw new UserDataCorrupt();
+                    }
+
 //                    LocalUser.setInstance(user);
 
                     getView().savedUserInLocal(password);
@@ -96,6 +105,12 @@ public class LockPresenter extends BasePresenter<LockMvpView> {
                 Timber.d( "get failed with ", task.getException());
             }
         });
+    }
+
+    private static class UserDataCorrupt extends RuntimeException {
+        UserDataCorrupt() {
+            super("User data is corrupt on server");
+        }
     }
 
     public void loginOnlineEmail(String password) {

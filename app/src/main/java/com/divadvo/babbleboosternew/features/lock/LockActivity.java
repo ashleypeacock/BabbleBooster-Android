@@ -204,6 +204,11 @@ public class LockActivity extends BaseActivity implements LockMvpView {
     }
 
     @Override
+    public void displayMessage(String errorWithUserDetails) {
+        Toast.makeText(this, "Error with user details", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
     public void displayStatus(int numberRemaining) {
         textStatus.setText("Please wait until 0. Remaining: " + numberRemaining);
         Timber.i("Remaining: " + numberRemaining);

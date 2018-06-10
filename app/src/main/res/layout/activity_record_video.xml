@@ -45,23 +45,31 @@
         <Button
             android:id="@+id/button_yes_new"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="YES" />
 
         <Button
             android:id="@+id/button_attempt_new"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="GOOD TRY" />
 
         <Button
             android:id="@+id/button_no_new"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="TRY AGAIN" />
+
+        <Button
+            android:id="@+id/button_review_video"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="PLAY" />
+
     </LinearLayout>
 
 
