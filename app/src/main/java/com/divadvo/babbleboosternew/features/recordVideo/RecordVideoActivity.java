@@ -6,7 +6,9 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -62,6 +64,7 @@ public class RecordVideoActivity extends BaseActivity implements RecordVideoMvpV
 
     private String phoneme;
     private boolean isTest;
+    private String TAG = "RecordVideoActivity";
 
     public static Intent getStartIntent(Context context, String phoneme, boolean isTest) {
         Intent intent = new Intent(context, RecordVideoActivity.class);
@@ -84,8 +87,22 @@ public class RecordVideoActivity extends BaseActivity implements RecordVideoMvpV
         btnYes.setOnClickListener(buttonClickListener);
         btnAttempt.setOnClickListener(buttonClickListener);
         btnNo.setOnClickListener(buttonClickListener);
+    }
 
+    @Override
+    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
         startCamera();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
     }
 
     @OnClick(R.id.button_review_video)
@@ -142,7 +159,7 @@ public class RecordVideoActivity extends BaseActivity implements RecordVideoMvpV
                 saveAttemptVideo(data.getDataString());
             } else if (data != null) {
                 Exception e = (Exception) data.getSerializableExtra(MaterialCamera.ERROR_EXTRA);
-                e.printStackTrace();
+                Log.e(TAG, "onActivityResult: ", e);
                 Crashlytics.logException(e);
             }
         }
