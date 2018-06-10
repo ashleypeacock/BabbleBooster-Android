@@ -1,6 +1,5 @@
 package com.divadvo.babbleboosternew.features.recordVideo;
 
-import com.divadvo.babbleboosternew.data.DataManager;
 import com.divadvo.babbleboosternew.data.local.Attempt;
 import com.divadvo.babbleboosternew.data.local.DbManager;
 import com.divadvo.babbleboosternew.data.local.LocalUser;
@@ -55,7 +54,7 @@ public class RecordVideoPresenter extends BasePresenter<RecordVideoMvpView> {
 
         Attempt attempt = new Attempt(LocalUser.getInstance().username, isTest, phoneme, attemptNumber, newVideoFilename, response, System.currentTimeMillis());
         // Save attempt in DB
-        dbManager.saveAttempt(attempt);
+        dbManager.saveAttemptLocal(attempt);
     }
 
 

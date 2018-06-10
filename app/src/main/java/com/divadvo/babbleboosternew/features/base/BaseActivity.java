@@ -12,6 +12,7 @@ import butterknife.ButterKnife;
 
 import com.divadvo.babbleboosternew.MvpStarterApplication;
 import com.divadvo.babbleboosternew.data.local.DbManager;
+import com.divadvo.babbleboosternew.data.local.LocalUser;
 import com.divadvo.babbleboosternew.data.local.Session;
 import com.divadvo.babbleboosternew.features.lock.LockActivity;
 import com.divadvo.babbleboosternew.injection.component.ActivityComponent;
@@ -123,8 +124,10 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         shouldCheckCredentials = true;
-        Session s = new Session(startTime, System.currentTimeMillis() - startTime, this.getLocalClassName());
-        dbManager.saveSession(s);
+        if(LocalUser.getInstance() != null && LocalUser.getInstance().username != null) {
+            Session s = new Session(startTime, System.currentTimeMillis() - startTime, this.getLocalClassName(), LocalUser.getInstance().username);
+            dbManager.saveSessionLocal(s);
+        }
         super.onPause();
     }
 

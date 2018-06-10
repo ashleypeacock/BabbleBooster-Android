@@ -214,6 +214,7 @@ public class FirebaseSyncHelper {
     }
 
     private void uploadSessions() {
+
         CollectionReference collectionAttempts = db.collection("session").document(LocalUser.getInstance().username).collection("sessions");
 
         List<Session> sessionsInDatabase = new ArrayList<>();
@@ -230,7 +231,7 @@ public class FirebaseSyncHelper {
 
                     // If not in local database, save it
                     if(!allAttemptsBefore.contains(session)) {
-                        dbManager.saveSession(session);
+                        dbManager.saveSessionLocal(session);
                     }
                 }
 
@@ -238,9 +239,11 @@ public class FirebaseSyncHelper {
                 List<Session> allAttempts = dbManager.getAllSessionsFromRealm();
                 // Upload not existent
                 for(Session session : allAttempts) {
+
                     // Skip if already uploaded
-                    if(sessionsInDatabase.contains(session))
+                    if(sessionsInDatabase.contains(session)) {
                         continue;
+                    }
 
                     collectionAttempts.add(session);
                 }
@@ -261,6 +264,7 @@ public class FirebaseSyncHelper {
 
         collectionAttempts.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
+
                 List<Attempt> allAttemptsBefore = dbManager.getAllAttemptsFromRealm();
                 for (DocumentSnapshot document : task.getResult()) {
                     Attempt attempt = document.toObject(Attempt.class);
@@ -269,7 +273,7 @@ public class FirebaseSyncHelper {
                     // If remote attempt is of the current user
                     // And it's not in the local database, then save it
                     if(attempt.getUsername().equals(LocalUser.getInstance().username) && !allAttemptsBefore.contains(attempt)) {
-                        dbManager.saveAttempt(attempt);
+                        dbManager.saveAttemptLocal(attempt);
                     }
                 }
 

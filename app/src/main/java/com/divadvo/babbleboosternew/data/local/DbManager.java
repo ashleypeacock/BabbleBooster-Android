@@ -57,7 +57,7 @@ public class DbManager {
         }
     }
 
-    public void saveSession(Session session) {
+    public void saveSessionLocal(Session session) {
         realm.beginTransaction();
 
 //        if(attempt.isTest()) {
@@ -74,7 +74,7 @@ public class DbManager {
         realm.commitTransaction();
     }
 
-    public void saveAttempt(Attempt attempt) {
+    public void saveAttemptLocal(Attempt attempt) {
         realm.beginTransaction();
 
         RealmAttempt realmAttempt = attempt.generateRealmAttempt();
@@ -85,7 +85,7 @@ public class DbManager {
     }
 
     public RealmResults<RealmSession> getAllRealmSessions() {
-        return realm.where(RealmSession.class).findAll();
+        return realm.where(RealmSession.class).equalTo("username", LocalUser.getInstance().username).findAll();
     }
 
     public RealmResults<RealmAttempt> getAllRealmAttempts() {
