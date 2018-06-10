@@ -34,6 +34,8 @@ import javax.inject.Singleton;
 
 import timber.log.Timber;
 
+import static io.fabric.sdk.android.Fabric.TAG;
+
 @Singleton
 public class FirebaseSyncHelper {
 
@@ -66,7 +68,8 @@ public class FirebaseSyncHelper {
         .get()
         .addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                progressView.tryStartingHomeButWaitUntilFinished();
+
+                //progressView.tryStartingHomeButWaitUntilFinished();
 
                 for (DocumentSnapshot document : task.getResult()) {
                     Timber.d(document.getId() + " => " + document.getData());
@@ -116,24 +119,28 @@ public class FirebaseSyncHelper {
 
         File fileLocation = new File(folderF, fileName);
 
-
-
         StorageReference objectReference = firebaseStorage.getReferenceFromUrl(gsFileLocation);
 
         // TODO: check if doesn't exist
         if(!fileLocation.exists()) {
-//            progressView.displayStatus("Downloading file: " + fileName);
-
             tasksToFinish++;
             tasksToF.incrementAndGet();
-            progressView.displayStatus(tasksToF.get());
+
+            if(progressView != null) {
+                progressView.displayStatus(tasksToF.get());
+            }
 
 //            tasks.add(gsFileLocation);
             // Handle any errors
             objectReference.getFile(fileLocation).addOnSuccessListener(taskSnapshot -> {
                 tasksToFinish--;
                 tasksToF.decrementAndGet();
-                progressView.displayStatus(tasksToF.get());
+
+                if(progressView != null) {
+                    progressView.displayStatus(tasksToF.get());
+                }
+
+                Log.d(TAG, "downloadFile: " + taskSnapshot.toString());
 //                tasks.remove(gsFileLocation);
                 // Local temp file has been created
             }).addOnFailureListener(exception -> {
@@ -333,7 +340,10 @@ public class FirebaseSyncHelper {
 //        tasks.add(fileFirebase);
         tasksToF.incrementAndGet();
         Timber.i("tasksToF: " + tasksToF.get());
-        progressView.displayStatus(tasksToF.get());
+
+        if(progressView != null) {
+            progressView.displayStatus(tasksToF.get());
+        }
 
         StorageReference storageRef = firebaseStorage.getReference();
         StorageReference firebaseFile = storageRef.child(fileFirebase);
@@ -348,7 +358,9 @@ public class FirebaseSyncHelper {
             // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
             tasksToFinish--;
             tasksToF.decrementAndGet();
-            progressView.displayStatus(tasksToF.get());
+            if(progressView != null) {
+                progressView.displayStatus(tasksToF.get());
+            }
 //            tasks.remove(fileFirebase);
             Uri downloadUrl = taskSnapshot.getDownloadUrl();
             Timber.i("Upload successful", downloadUrl);

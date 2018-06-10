@@ -49,7 +49,6 @@ public class Session {
     @Override
     public boolean equals(Object obj) {
         Session other = (Session) obj;
-        //return (this.sessionStart == other.sessionStart) && (this.sessionLength == other.sessionLength) && (this.username.equals(other.username));
-        return true;
+        return (this.sessionStart == other.sessionStart) && (this.sessionLength == other.sessionLength) && (this.username.equals(other.username));
     }
 }

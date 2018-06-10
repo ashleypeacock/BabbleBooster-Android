@@ -37,7 +37,8 @@ public class BasePresenter<T extends MvpView> implements Presenter<T> {
     }
 
     protected void checkViewAttached() {
-        if (!isViewAttached()) throw new MvpViewNotAttachedException();
+        if (!isViewAttached())
+            throw new MvpViewNotAttachedException();
     }
 
     public void addDisposable(Disposable disposable) {

@@ -189,6 +189,18 @@ public class LockActivity extends BaseActivity implements LockMvpView {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        firebaseSyncHelper.setProgressView(null);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        firebaseSyncHelper.setProgressView(this);
+    }
+
+    @Override
     public void tryStartingHomeButWaitUntilFinished() {
 //        try {
 //            Thread.sleep(300);
