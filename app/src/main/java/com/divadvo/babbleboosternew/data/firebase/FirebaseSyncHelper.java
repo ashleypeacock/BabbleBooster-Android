@@ -73,6 +73,7 @@ public class FirebaseSyncHelper {
 
                 for (DocumentSnapshot document : task.getResult()) {
                     Timber.d(document.getId() + " => " + document.getData());
+                    Log.d(TAG, "downloadPhonemes: " + "data: " + document.getId()  + "," + document.getData());
                     downloadPhoneme(document);
                 }
             } else {
@@ -105,15 +106,17 @@ public class FirebaseSyncHelper {
 
     private void downloadFile(String folder, String gsFileLocation, List<String> filesToIgnore) {
         String fileName = gsFileLocation.substring(gsFileLocation.lastIndexOf('/') + 1, gsFileLocation.length());
+        File f = new File(fileName);
 
         // Only download if not previously deleted by the user
-        if(!filesToIgnore.contains(fileName)) {
+        if(!filesToIgnore.contains(fileName) && !(f.length() == 0)) {
             downloadFile(folder, gsFileLocation);
         }
 
     }
 
     private void downloadFile(String folder, String gsFileLocation) {
+
         File folderF = new File(folder);
         String fileName = gsFileLocation.substring(gsFileLocation.lastIndexOf('/') + 1, gsFileLocation.length());
 
@@ -121,8 +124,9 @@ public class FirebaseSyncHelper {
 
         StorageReference objectReference = firebaseStorage.getReferenceFromUrl(gsFileLocation);
 
+        long length = fileLocation.length();
         // TODO: check if doesn't exist
-        if(!fileLocation.exists()) {
+        if(!fileLocation.exists() || (fileLocation.length() == 0)) {
             tasksToFinish++;
             tasksToF.incrementAndGet();
 
@@ -145,6 +149,7 @@ public class FirebaseSyncHelper {
                 // Local temp file has been created
             }).addOnFailureListener(exception -> {
                 Timber.e(exception);
+                fileLocation.delete();
                 Log.e("Error", "downloadFile: " + fileLocation + ", " + fileName, exception);
             });
         }
@@ -376,7 +381,11 @@ public class FirebaseSyncHelper {
 
     public void waitSeconds(int i) {
         tasksToF.incrementAndGet();
-        progressView.displayStatus(tasksToF.get());
+
+        Log.d(TAG, "waitSeconds:");
+        if(progressView != null) {
+            progressView.displayStatus(tasksToF.get());
+        }
 
         Handler handler = new Handler();
         handler.postDelayed(() -> {

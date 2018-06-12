@@ -11,10 +11,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.bumptech.glide.Glide;
 import com.divadvo.babbleboosternew.R;
+import com.divadvo.babbleboosternew.data.firebase.FirebaseSyncHelper;
 import com.divadvo.babbleboosternew.data.local.DbManager;
 import com.divadvo.babbleboosternew.data.local.Session;
 import com.divadvo.babbleboosternew.data.local.StorageHelper;
@@ -49,6 +51,9 @@ public class LearnPhonemesActivity extends BaseActivity implements LearnPhonemes
 
     @Inject
     DbManager dbManager;
+
+    @Inject
+    FirebaseSyncHelper firebaseSyncHelper;
 
     @BindView(R.id.image_phoneme)
     ImageView phonemeImage;
@@ -297,14 +302,15 @@ public class LearnPhonemesActivity extends BaseActivity implements LearnPhonemes
             phonemeAudio.setDataSource(audioPath);
             phonemeAudio.prepare();
         } catch (IOException e) {
+            Toast.makeText(this, "File not found or storage full. Trying to redownload.", Toast.LENGTH_LONG).show();
+            firebaseSyncHelper.downloadFromFirebase();
+            finish();
             e.printStackTrace();
         }
     }
 
     @Override
     protected void onPause() {
-        //learnPhonemesPresenter.addSession(startTime);
-//        dbManager.saveSession(new Session(startTime, System.currentTimeMillis() - startTime));
         super.onPause();
     }
 

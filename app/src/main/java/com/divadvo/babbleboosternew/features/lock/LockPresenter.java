@@ -7,6 +7,8 @@ import com.divadvo.babbleboosternew.data.local.PreferencesHelper;
 import com.divadvo.babbleboosternew.data.local.User;
 import com.divadvo.babbleboosternew.features.base.BasePresenter;
 import com.divadvo.babbleboosternew.injection.ConfigPersistent;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -57,8 +59,9 @@ public class LockPresenter extends BasePresenter<LockMvpView> {
     private void signInAnonymously(String password) {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
-        mAuth.signInAnonymously()
-        .addOnCompleteListener(task -> {
+        Task<AuthResult> resultTask = mAuth.signInAnonymously();
+
+        resultTask.addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 Timber.i("Success");
                 afterSignedInOnline(password);

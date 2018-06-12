@@ -6,6 +6,9 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -65,6 +68,7 @@ public class RecordVideoActivity extends BaseActivity implements RecordVideoMvpV
     private String phoneme;
     private boolean isTest;
     private String TAG = "RecordVideoActivity";
+    private Handler handler;
 
     public static Intent getStartIntent(Context context, String phoneme, boolean isTest) {
         Intent intent = new Intent(context, RecordVideoActivity.class);
@@ -87,12 +91,22 @@ public class RecordVideoActivity extends BaseActivity implements RecordVideoMvpV
         btnYes.setOnClickListener(buttonClickListener);
         btnAttempt.setOnClickListener(buttonClickListener);
         btnNo.setOnClickListener(buttonClickListener);
+
+        handler = new Handler(Looper.getMainLooper());
+
     }
+
+    Runnable camera = new Runnable() {
+        @Override
+        public void run() {
+            startCamera();
+        }
+    };
 
     @Override
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        startCamera();
+        handler.postDelayed(camera, 500);
     }
 
     @Override
@@ -103,6 +117,7 @@ public class RecordVideoActivity extends BaseActivity implements RecordVideoMvpV
     @Override
     protected void onPause() {
         super.onPause();
+        handler.removeCallbacks(camera);
     }
 
     @OnClick(R.id.button_review_video)
@@ -157,6 +172,7 @@ public class RecordVideoActivity extends BaseActivity implements RecordVideoMvpV
 
             if (resultCode == RESULT_OK) {
                 saveAttemptVideo(data.getDataString());
+                findViewById(R.id.layout_main).setVisibility(View.VISIBLE);
             } else if (data != null) {
                 Exception e = (Exception) data.getSerializableExtra(MaterialCamera.ERROR_EXTRA);
                 Log.e(TAG, "onActivityResult: ", e);
