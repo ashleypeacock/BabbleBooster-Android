@@ -69,6 +69,7 @@ public class RecordVideoActivity extends BaseActivity implements RecordVideoMvpV
     private boolean isTest;
     private String TAG = "RecordVideoActivity";
     private Handler handler;
+    private int cameraCrash = 0;
 
     public static Intent getStartIntent(Context context, String phoneme, boolean isTest) {
         Intent intent = new Intent(context, RecordVideoActivity.class);
@@ -96,17 +97,11 @@ public class RecordVideoActivity extends BaseActivity implements RecordVideoMvpV
 
     }
 
-    Runnable camera = new Runnable() {
-        @Override
-        public void run() {
-            startCamera();
-        }
-    };
 
     @Override
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        handler.postDelayed(camera, 500);
+        startCamera();
     }
 
     @Override
@@ -117,7 +112,6 @@ public class RecordVideoActivity extends BaseActivity implements RecordVideoMvpV
     @Override
     protected void onPause() {
         super.onPause();
-        handler.removeCallbacks(camera);
     }
 
     @OnClick(R.id.button_review_video)
@@ -176,6 +170,12 @@ public class RecordVideoActivity extends BaseActivity implements RecordVideoMvpV
             } else if (data != null) {
                 Exception e = (Exception) data.getSerializableExtra(MaterialCamera.ERROR_EXTRA);
                 Log.e(TAG, "onActivityResult: ", e);
+                startCamera();
+                cameraCrash++;
+                if(cameraCrash == 3) {
+                    Toast.makeText(this, "Something wrong with camera", Toast.LENGTH_LONG).show();
+                }
+
                 Crashlytics.logException(e);
             }
         }

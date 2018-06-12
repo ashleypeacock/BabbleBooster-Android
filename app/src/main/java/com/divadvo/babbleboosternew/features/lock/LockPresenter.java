@@ -29,8 +29,7 @@ public class LockPresenter extends BasePresenter<LockMvpView> {
     }
 
     public void loginOffline(String password) {
-            checkViewAttached();
-
+        checkViewAttached();
         if (isCorrectPassword(password)) {
             getView().loginSuccessfulOffline(password);
         } else {

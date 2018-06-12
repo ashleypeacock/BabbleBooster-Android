@@ -12,6 +12,7 @@ import com.divadvo.babbleboosternew.data.local.DbManager;
 import com.divadvo.babbleboosternew.data.local.LocalUser;
 import com.divadvo.babbleboosternew.data.local.Session;
 import com.divadvo.babbleboosternew.data.local.StorageHelper;
+import com.divadvo.babbleboosternew.data.local.User;
 import com.divadvo.babbleboosternew.features.lock.LockMvpView;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -47,7 +48,6 @@ public class FirebaseSyncHelper {
     DbManager dbManager;
     private LockMvpView progressView;
 
-    public volatile int tasksToFinish = 0;
     public ArrayList<String> tasks = new ArrayList<>();
     public AtomicInteger tasksToF = new AtomicInteger(0);
 
@@ -60,27 +60,37 @@ public class FirebaseSyncHelper {
 
     public void downloadFromFirebase() {
         downloadPhonemes();
-        downloadReinforcement();
     }
 
     private void downloadPhonemes() {
+
+        Log.d("LoginTest", "downloadingPheneme: ");
+        tasksToF.incrementAndGet();
+
         db.collection("phonemeData")
         .get()
         .addOnCompleteListener(task -> {
+            tasksToF.decrementAndGet();
             if (task.isSuccessful()) {
-                //progressView.tryStartingHomeButWaitUntilFinished();
+//                progressView.tryStartingHomeButWaitUntilFinished();
                 for (DocumentSnapshot document : task.getResult()) {
                     Timber.d(document.getId() + " => " + document.getData());
                     Log.d(TAG, "downloadPhonemes: " + "data: " + document.getId()  + "," + document.getData());
-                    downloadPhoneme(document);
+                    String phonemeName = document.get("phoneme").toString();
+
+                    if(LocalUser.getInstance().all_phonemes.contains(phonemeName)) {
+                        downloadPhonemeData(document);
+                    }
                 }
+                downloadReinforcement();
+                Log.d("LoginTest", "finished downloading phenomes: ");
             } else {
                 Timber.d("Error getting documents.", task.getException());
             }
         });
     }
 
-    private void downloadPhoneme(DocumentSnapshot phoneme) {
+    private void downloadPhonemeData(DocumentSnapshot phoneme) {
         Map<String, Object> data = phoneme.getData();
         String phonemeString = data.get("phoneme").toString();
         String finalVideo = data.get("finalVideo").toString();
@@ -125,24 +135,23 @@ public class FirebaseSyncHelper {
         long length = fileLocation.length();
         // TODO: check if doesn't exist
         if(!fileLocation.exists() || (fileLocation.length() == 0)) {
-            tasksToFinish++;
             tasksToF.incrementAndGet();
+
+            Log.d(TAG, "downloadFile: " + tasksToF.get());
 
             if(progressView != null) {
                 progressView.displayStatus(tasksToF.get());
             }
 
-//            tasks.add(gsFileLocation);
             // Handle any errors
             objectReference.getFile(fileLocation).addOnSuccessListener(taskSnapshot -> {
-                tasksToFinish--;
                 tasksToF.decrementAndGet();
 
                 if(progressView != null) {
                     progressView.displayStatus(tasksToF.get());
                 }
 
-                Log.d(TAG, "downloadFile: " + taskSnapshot.toString());
+                Log.d("LoginTest", "downloadFile: " + fileLocation.getName());
 //                tasks.remove(gsFileLocation);
                 // Local temp file has been created
             }).addOnFailureListener(exception -> {
@@ -154,12 +163,14 @@ public class FirebaseSyncHelper {
     }
 
     public boolean isDownloading() {
-        return tasksToFinish != 0;
+        return tasksToF.get() > 0;
     }
 
     private void downloadReinforcement() {
+        tasksToF.incrementAndGet();
         db.collection("users").document("default")
         .get().addOnCompleteListener(task -> {
+            tasksToF.decrementAndGet();
             if (task.isSuccessful()) {
                 DocumentSnapshot document = task.getResult();
                 downloadReinforcementFiles(document);
@@ -182,7 +193,9 @@ public class FirebaseSyncHelper {
     public void uploadEverything() {
         uploadAttempts();
         uploadTests();
-        downloadDatabase();
+        uploadDatabase();
+        uploadMastered();
+        uploadSessions();
     }
 
     private void uploadAttempts() {
@@ -218,13 +231,6 @@ public class FirebaseSyncHelper {
         }
     }
 
-
-
-    private void downloadDatabase() {
-        uploadDatabase();
-        uploadMastered();
-        uploadSessions();
-    }
 
     private void uploadSessions() {
 
@@ -289,7 +295,6 @@ public class FirebaseSyncHelper {
                         dbManager.saveAttemptLocal(attempt);
                     }
                 }
-
 
                 List<Attempt> allAttempts = dbManager.getAllAttemptsFromRealm();
                 // Upload not existent
@@ -362,7 +367,6 @@ public class FirebaseSyncHelper {
             Timber.e("Upload failed", exception2);
         }).addOnSuccessListener(taskSnapshot -> {
             // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
-            tasksToFinish--;
             tasksToF.decrementAndGet();
             if(progressView != null) {
                 progressView.displayStatus(tasksToF.get());
@@ -383,7 +387,7 @@ public class FirebaseSyncHelper {
     public void waitSeconds(int i) {
         tasksToF.incrementAndGet();
 
-        Log.d(TAG, "waitSeconds:");
+        Log.d("LoginTest", "waitSeconds:");
         if(progressView != null) {
             progressView.displayStatus(tasksToF.get());
         }

@@ -9,6 +9,7 @@ import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -182,8 +183,9 @@ public class LockActivity extends BaseActivity implements LockMvpView {
 //        textStatus.setText("Please wait");
         lockPresenter.loadUser();
         firebaseSyncHelper.setProgressView(this);
+        Log.d("LoginTest", "savedUserInLocal: ");
         buttonLogin.setEnabled(false);
-        firebaseSyncHelper.waitSeconds(5);
+        firebaseSyncHelper.waitSeconds(2);
         firebaseSyncHelper.downloadFromFirebase();
         firebaseSyncHelper.uploadEverything();
     }
