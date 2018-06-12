@@ -149,8 +149,12 @@ public class LearnPhonemesActivity extends BaseActivity implements LearnPhonemes
     }
 
     private void showCurrentImage(boolean playSound) {
-        String imagePath = imageFilesToDisplay.get(currentImageIndex);
-        Glide.with(this).load(new File(imagePath)).into(phonemeImage);
+        try {
+            String imagePath = imageFilesToDisplay.get(currentImageIndex);
+            Glide.with(this).load(new File(imagePath)).into(phonemeImage);
+        }catch(Exception e) {
+            Toast.makeText(this, "Cannot find images on device. Please redownload", Toast.LENGTH_LONG).show();
+        }
 //        Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
 //        phonemeImage.setImageBitmap(bitmap);
         if(playSound) {
@@ -256,10 +260,13 @@ public class LearnPhonemesActivity extends BaseActivity implements LearnPhonemes
         String regex = StorageHelper.IMAGE_REGEX;
         String path = phonemeDirectoryPath;
         List<File> files = storage.getFiles(path, regex);
-
         List<String> paths = new ArrayList<>();
-        for (File file : files) {
-            paths.add(file.getAbsolutePath());
+        try {
+            for (File file : files) {
+                paths.add(file.getAbsolutePath());
+            }
+        }catch(Exception e) {
+            Toast.makeText(this, "Please redownload images.", Toast.LENGTH_LONG).show();
         }
 
         imageFilesToDisplay = paths;
@@ -271,6 +278,13 @@ public class LearnPhonemesActivity extends BaseActivity implements LearnPhonemes
         String regex = StorageHelper.VIDEO_REGEX;
         String path = phonemeDirectoryPath;
         List<File> files = storage.getFiles(path, regex);
+
+        if(files == null) {
+            Toast.makeText(this, "Files are still downloading. Please retry", Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
+
 
         List<String> paths = new ArrayList<>();
         for (File file : files) {
@@ -301,9 +315,11 @@ public class LearnPhonemesActivity extends BaseActivity implements LearnPhonemes
             audioPath = files.get(0).getAbsolutePath();
             phonemeAudio.setDataSource(audioPath);
             phonemeAudio.prepare();
-        } catch (IOException e) {
+        } catch (Exception e) {
             Toast.makeText(this, "File not found or storage full. Trying to redownload.", Toast.LENGTH_LONG).show();
-            firebaseSyncHelper.downloadFromFirebase();
+            if(!firebaseSyncHelper.isDownloading()) {
+                firebaseSyncHelper.downloadFromFirebase();
+            }
             finish();
             e.printStackTrace();
         }

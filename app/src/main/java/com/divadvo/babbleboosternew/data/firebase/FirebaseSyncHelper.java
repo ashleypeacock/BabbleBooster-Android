@@ -68,9 +68,7 @@ public class FirebaseSyncHelper {
         .get()
         .addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-
                 //progressView.tryStartingHomeButWaitUntilFinished();
-
                 for (DocumentSnapshot document : task.getResult()) {
                     Timber.d(document.getId() + " => " + document.getData());
                     Log.d(TAG, "downloadPhonemes: " + "data: " + document.getId()  + "," + document.getData());
@@ -109,7 +107,7 @@ public class FirebaseSyncHelper {
         File f = new File(fileName);
 
         // Only download if not previously deleted by the user
-        if(!filesToIgnore.contains(fileName) && !(f.length() == 0)) {
+        if(!filesToIgnore.contains(fileName) || f.length() == 0) {
             downloadFile(folder, gsFileLocation);
         }
 
@@ -153,7 +151,10 @@ public class FirebaseSyncHelper {
                 Log.e("Error", "downloadFile: " + fileLocation + ", " + fileName, exception);
             });
         }
+    }
 
+    public boolean isDownloading() {
+        return tasksToFinish != 0;
     }
 
     private void downloadReinforcement() {
