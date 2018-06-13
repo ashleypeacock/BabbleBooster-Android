@@ -1,7 +1,9 @@
 package com.divadvo.babbleboosternew.features.lock;
 
+import android.util.Log;
 import android.widget.Toast;
 
+import com.divadvo.babbleboosternew.data.firebase.FirebaseSyncHelper;
 import com.divadvo.babbleboosternew.data.local.LocalUser;
 import com.divadvo.babbleboosternew.data.local.PreferencesHelper;
 import com.divadvo.babbleboosternew.data.local.User;
@@ -24,6 +26,9 @@ public class LockPresenter extends BasePresenter<LockMvpView> {
     private PreferencesHelper preferencesHelper;
 
     @Inject
+    FirebaseSyncHelper firebaseSyncHelper;
+
+    @Inject
     public LockPresenter(PreferencesHelper preferencesHelper) {
         this.preferencesHelper = preferencesHelper;
     }
@@ -39,6 +44,9 @@ public class LockPresenter extends BasePresenter<LockMvpView> {
 
     private boolean isCorrectPassword(String password) {
         String usernameSaved = preferencesHelper.getString("username");
+
+        if(password == null)
+            Log.d("LockPresenter", "isCorrectPassword: ");
 
         if(doesLocalUserExist()) {
             return password.equals(usernameSaved);
@@ -75,6 +83,18 @@ public class LockPresenter extends BasePresenter<LockMvpView> {
         signInAnonymously(password);
     }
 
+    public void savedUserInLocal(String password) {
+        // Sync with firebase
+//        textStatus.setText("Please wait");
+        loadUser();
+//        firebaseSyncHelper.setProgressView(this);
+        Log.d("LoginTest", "savedUserInLocal: ");
+        getView().getLoginButton().setEnabled(false);
+        firebaseSyncHelper.waitSeconds(2);
+        firebaseSyncHelper.downloadFromFirebase();
+        firebaseSyncHelper.uploadEverything();
+    }
+
     private void afterSignedInOnline(String password) {
         // Get the document from firestore under "users" collection
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -97,7 +117,9 @@ public class LockPresenter extends BasePresenter<LockMvpView> {
 //                        throw new UserDataCorrupt();
                     }
 
-                    getView().savedUserInLocal(password);
+                    if(getView() != null) {
+                        savedUserInLocal(password);
+                    }
                 } else {
                     Timber.d( "No such document");
                     getView().wrongPassword();
@@ -123,7 +145,7 @@ public class LockPresenter extends BasePresenter<LockMvpView> {
         mAuth.signInWithEmailAndPassword(email, email).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
 //                FirebaseUser user = mAuth.getCurrentUser();
-                getView().savedUserInLocal(password);
+                savedUserInLocal(password);
             } else {
                 Timber.e(task.getException());
                 getView().wrongPassword();

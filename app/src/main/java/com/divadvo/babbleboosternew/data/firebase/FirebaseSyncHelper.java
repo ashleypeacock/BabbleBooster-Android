@@ -14,10 +14,13 @@ import com.divadvo.babbleboosternew.data.local.Session;
 import com.divadvo.babbleboosternew.data.local.StorageHelper;
 import com.divadvo.babbleboosternew.data.local.User;
 import com.divadvo.babbleboosternew.features.lock.LockMvpView;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -47,6 +50,7 @@ public class FirebaseSyncHelper {
     StorageHelper storageHelper;
     DbManager dbManager;
     private LockMvpView progressView;
+    Task<QuerySnapshot> ptask;
 
     public ArrayList<String> tasks = new ArrayList<>();
     public AtomicInteger tasksToF = new AtomicInteger(0);
@@ -67,9 +71,9 @@ public class FirebaseSyncHelper {
         Log.d("LoginTest", "downloadingPheneme: ");
         tasksToF.incrementAndGet();
 
-        db.collection("phonemeData")
-        .get()
-        .addOnCompleteListener(task -> {
+        ptask = db.collection("phonemeData").get();
+
+        ptask.addOnCompleteListener(task -> {
             tasksToF.decrementAndGet();
             if (task.isSuccessful()) {
 //                progressView.tryStartingHomeButWaitUntilFinished();
@@ -123,6 +127,9 @@ public class FirebaseSyncHelper {
 
     }
 
+
+    ArrayList<FileDownloadTask> downloadTasks = new ArrayList<>();
+
     private void downloadFile(String folder, String gsFileLocation) {
 
         File folderF = new File(folder);
@@ -137,19 +144,22 @@ public class FirebaseSyncHelper {
         if(!fileLocation.exists() || (fileLocation.length() == 0)) {
             tasksToF.incrementAndGet();
 
-            Log.d(TAG, "downloadFile: " + tasksToF.get());
-
             if(progressView != null) {
                 progressView.displayStatus(tasksToF.get());
             }
 
-            // Handle any errors
-            objectReference.getFile(fileLocation).addOnSuccessListener(taskSnapshot -> {
+            FileDownloadTask t = objectReference.getFile(fileLocation);
+
+            downloadTasks.add(t);
+
+            t.addOnSuccessListener(taskSnapshot -> {
                 tasksToF.decrementAndGet();
 
                 if(progressView != null) {
                     progressView.displayStatus(tasksToF.get());
                 }
+
+                downloadTasks.remove(t);
 
                 Log.d("LoginTest", "downloadFile: " + fileLocation.getName());
 //                tasks.remove(gsFileLocation);
@@ -396,7 +406,9 @@ public class FirebaseSyncHelper {
         handler.postDelayed(() -> {
             // Do after i seconds
             tasksToF.decrementAndGet();
-            progressView.displayStatus(tasksToF.get());
+            if(progressView != null) {
+                progressView.displayStatus(tasksToF.get());
+            }
         }, i * 1000);
 
     }

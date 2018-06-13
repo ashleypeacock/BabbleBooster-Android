@@ -58,6 +58,7 @@ public class LockActivity extends BaseActivity implements LockMvpView {
 
     @BindView(R.id.text_status)
     TextView textStatus;
+
     private String enteredPassword;
 
 //    @BindView(R.id.button_clear_data)
@@ -89,19 +90,32 @@ public class LockActivity extends BaseActivity implements LockMvpView {
         });
 
         buttonLoginOnline.setOnClickListener(v -> {
-            String enteredPassword = editTextPassword.getText().toString();
+            enteredPassword = editTextPassword.getText().toString();
             if (enteredPassword.isEmpty())
                 Toast.makeText(this, "Enter password", Toast.LENGTH_SHORT).show();
             else
                 lockPresenter.loginOnline(enteredPassword);
         });
 
+        if(savedInstanceState != null) {
+            enteredPassword = savedInstanceState.getString("enteredpass");
+            editTextPassword.setText(enteredPassword);
+        }
 
-        // Login disabled if not logged in online yet
+        Log.d("Test", "onCreate: ");
+        
 //        buttonLogin.setEnabled(lockPresenter.doesLocalUserExist());
 
+    }
 
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putString("enteredpass", editTextPassword.getText().toString());
+    }
 
+    public Button getLoginButton() {
+        return buttonLogin;
     }
 
     @Override
@@ -177,18 +191,6 @@ public class LockActivity extends BaseActivity implements LockMvpView {
         finish();
     }
 
-    @Override
-    public void savedUserInLocal(String password) {
-        // Sync with firebase
-//        textStatus.setText("Please wait");
-        lockPresenter.loadUser();
-        firebaseSyncHelper.setProgressView(this);
-        Log.d("LoginTest", "savedUserInLocal: ");
-        buttonLogin.setEnabled(false);
-        firebaseSyncHelper.waitSeconds(2);
-        firebaseSyncHelper.downloadFromFirebase();
-        firebaseSyncHelper.uploadEverything();
-    }
 
     @Override
     protected void onPause() {
