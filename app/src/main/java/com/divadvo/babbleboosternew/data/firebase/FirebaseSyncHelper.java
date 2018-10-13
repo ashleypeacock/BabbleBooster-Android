@@ -3,7 +3,6 @@ package com.divadvo.babbleboosternew.data.firebase;
 
 import android.content.Context;
 import android.net.Uri;
-import android.os.Handler;
 import android.util.Log;
 
 import com.divadvo.babbleboosternew.Constants;
@@ -12,7 +11,6 @@ import com.divadvo.babbleboosternew.data.local.DbManager;
 import com.divadvo.babbleboosternew.data.local.LocalUser;
 import com.divadvo.babbleboosternew.data.local.Session;
 import com.divadvo.babbleboosternew.data.local.StorageHelper;
-import com.divadvo.babbleboosternew.data.local.User;
 import com.divadvo.babbleboosternew.features.lock.LockMvpView;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
@@ -144,21 +142,12 @@ public class FirebaseSyncHelper {
         if(!fileLocation.exists() || (fileLocation.length() == 0)) {
             tasksToF.incrementAndGet();
 
-            if(progressView != null) {
-                progressView.displayStatus(tasksToF.get());
-            }
-
             FileDownloadTask t = objectReference.getFile(fileLocation);
 
             downloadTasks.add(t);
 
             t.addOnSuccessListener(taskSnapshot -> {
                 tasksToF.decrementAndGet();
-
-                if(progressView != null) {
-                    progressView.displayStatus(tasksToF.get());
-                }
-
                 downloadTasks.remove(t);
 
                 Log.d("LoginTest", "downloadFile: " + fileLocation.getName());
@@ -362,10 +351,6 @@ public class FirebaseSyncHelper {
         tasksToF.incrementAndGet();
         Timber.i("tasksToF: " + tasksToF.get());
 
-        if(progressView != null) {
-            progressView.displayStatus(tasksToF.get());
-        }
-
         StorageReference storageRef = firebaseStorage.getReference();
         StorageReference firebaseFile = storageRef.child(fileFirebase);
         UploadTask uploadTask = firebaseFile.putFile(file);
@@ -378,9 +363,6 @@ public class FirebaseSyncHelper {
         }).addOnSuccessListener(taskSnapshot -> {
             // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
             tasksToF.decrementAndGet();
-            if(progressView != null) {
-                progressView.displayStatus(tasksToF.get());
-            }
 //            tasks.remove(fileFirebase);
             Uri downloadUrl = taskSnapshot.getDownloadUrl();
             Timber.i("Upload successful", downloadUrl);
@@ -392,24 +374,5 @@ public class FirebaseSyncHelper {
 
     public void setProgressView(LockMvpView progressView) {
         this.progressView = progressView;
-    }
-
-    public void waitSeconds(int i) {
-        tasksToF.incrementAndGet();
-
-        Log.d("LoginTest", "waitSeconds:");
-        if(progressView != null) {
-            progressView.displayStatus(tasksToF.get());
-        }
-
-        Handler handler = new Handler();
-        handler.postDelayed(() -> {
-            // Do after i seconds
-            tasksToF.decrementAndGet();
-            if(progressView != null) {
-                progressView.displayStatus(tasksToF.get());
-            }
-        }, i * 1000);
-
     }
 }

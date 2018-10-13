@@ -12,8 +12,6 @@ public interface LockMvpView extends MvpView {
 
     Button getLoginButton();
 
-    void displayStatus(int numberRemaining);
-
     void tryStartingHomeButWaitUntilFinished();
 
     void displayMessage(String errorWithUserDetails);

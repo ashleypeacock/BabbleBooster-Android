@@ -1,10 +1,8 @@
 package com.divadvo.babbleboosternew.features.lock;
 
 import android.util.Log;
-import android.widget.Toast;
 
 import com.divadvo.babbleboosternew.data.firebase.FirebaseSyncHelper;
-import com.divadvo.babbleboosternew.data.local.LocalUser;
 import com.divadvo.babbleboosternew.data.local.PreferencesHelper;
 import com.divadvo.babbleboosternew.data.local.User;
 import com.divadvo.babbleboosternew.features.base.BasePresenter;
@@ -90,9 +88,7 @@ public class LockPresenter extends BasePresenter<LockMvpView> {
 //        firebaseSyncHelper.setProgressView(this);
         Log.d("LoginTest", "savedUserInLocal: ");
         getView().getLoginButton().setEnabled(false);
-        firebaseSyncHelper.waitSeconds(2);
-        firebaseSyncHelper.downloadFromFirebase();
-        firebaseSyncHelper.uploadEverything();
+        loginOffline(password);
     }
 
     private void afterSignedInOnline(String password) {
