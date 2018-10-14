@@ -4,6 +4,7 @@ package com.divadvo.babbleboosternew.data.firebase;
 import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
+import android.view.View;
 
 import com.divadvo.babbleboosternew.Constants;
 import com.divadvo.babbleboosternew.data.local.Attempt;
@@ -52,6 +53,7 @@ public class FirebaseSyncHelper {
 
     public ArrayList<String> tasks = new ArrayList<>();
     public AtomicInteger tasksToF = new AtomicInteger(0);
+    private View progressBar;
 
     @Inject
     public FirebaseSyncHelper(Context context, StorageHelper storageHelper, DbManager dbManager) {
@@ -61,15 +63,20 @@ public class FirebaseSyncHelper {
     }
 
     public void downloadFromFirebase() {
-        downloadPhonemes();
+        downloadFromFirebase(null);
     }
 
-    private void downloadPhonemes() {
+    public void downloadFromFirebase(View progressBar) {
+        if (isDownloading())
+            return;
 
+        this.progressBar = progressBar;
         Log.d("LoginTest", "downloadingPheneme: ");
         tasksToF.incrementAndGet();
 
         ptask = db.collection("phonemeData").get();
+
+        ptask.addOnFailureListener(command -> progressBar.setVisibility(View.GONE));
 
         ptask.addOnCompleteListener(task -> {
             tasksToF.decrementAndGet();
@@ -87,6 +94,7 @@ public class FirebaseSyncHelper {
                 downloadReinforcement();
                 Log.d("LoginTest", "finished downloading phenomes: ");
             } else {
+                progressBar.setVisibility(View.GONE);
                 Timber.d("Error getting documents.", task.getException());
             }
         });
@@ -153,10 +161,15 @@ public class FirebaseSyncHelper {
                 Log.d("LoginTest", "downloadFile: " + fileLocation.getName());
 //                tasks.remove(gsFileLocation);
                 // Local temp file has been created
+
+                if (!isDownloading())
+                    progressBar.setVisibility(View.GONE);
             }).addOnFailureListener(exception -> {
                 Timber.e(exception);
                 fileLocation.delete();
                 Log.e("Error", "downloadFile: " + fileLocation + ", " + fileName, exception);
+                if (!isDownloading())
+                    progressBar.setVisibility(View.GONE);
             });
         }
     }
@@ -187,6 +200,9 @@ public class FirebaseSyncHelper {
         String folderReinforcement = storageHelper.getReinforcementFolder();
         downloadFile(folderReinforcement, videoYes);
         downloadFile(folderReinforcement, videoGoodTry);
+
+        if (tasksToF.intValue() == 0 && !isDownloading())
+            progressBar.setVisibility(View.GONE);
     }
 
     public void uploadEverything() {

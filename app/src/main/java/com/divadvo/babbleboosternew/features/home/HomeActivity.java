@@ -4,10 +4,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
+import android.view.View;
 import android.widget.Button;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.divadvo.babbleboosternew.R;
+import com.divadvo.babbleboosternew.data.firebase.FirebaseSyncHelper;
 import com.divadvo.babbleboosternew.data.local.LocalUser;
 import com.divadvo.babbleboosternew.data.local.User;
 import com.divadvo.babbleboosternew.features.base.BaseActivity;
@@ -43,6 +45,11 @@ public class HomeActivity extends BaseActivity implements HomeMvpView {
     @BindView(R.id.button_progress)
     Button buttonProgress;
 
+    @Inject
+    FirebaseSyncHelper firebaseSyncHelper;
+
+    @BindView(R.id.progressBarLayout)
+    View progressBar;
 
     public static Intent getStartIntent(Context context) {
         Intent intent = new Intent(context, HomeActivity.class);
@@ -54,7 +61,7 @@ public class HomeActivity extends BaseActivity implements HomeMvpView {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
+        firebaseSyncHelper.downloadFromFirebase(progressBar);
         enableSomeButtons();
 
         buttonPlay.setOnClickListener(v -> startActivity(ChoosePhonemesActivity.getStartIntent(this)));
