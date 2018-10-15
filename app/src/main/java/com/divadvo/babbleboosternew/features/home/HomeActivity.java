@@ -53,7 +53,6 @@ public class HomeActivity extends BaseActivity implements HomeMvpView {
 
     public static Intent getStartIntent(Context context) {
         Intent intent = new Intent(context, HomeActivity.class);
-//        intent.putExtra(EXTRA_POKEMON_NAME, pokemonName);
         return intent;
     }
 
@@ -61,7 +60,7 @@ public class HomeActivity extends BaseActivity implements HomeMvpView {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        firebaseSyncHelper.downloadFromFirebase(progressBar);
+        firebaseSyncHelper.downloadFromFirebase(progressBar, findViewById(R.id.tv_progress));
         enableSomeButtons();
 
         buttonPlay.setOnClickListener(v -> startActivity(ChoosePhonemesActivity.getStartIntent(this)));

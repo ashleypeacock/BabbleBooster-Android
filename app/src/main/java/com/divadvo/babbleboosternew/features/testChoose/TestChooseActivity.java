@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
@@ -50,11 +51,12 @@ public class TestChooseActivity extends BaseActivity implements TestChooseMvpVie
         phonemes.addAll(LocalUser.getInstance().getCurrentPhonemes());
         phonemes.addAll(LocalUser.getInstance().mastered_phonemes);
         generateButtons();
+
         firebaseSyncHelper.uploadEverything();
     }
 
     private void generateButtons() {
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 150, 1.0f);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f);
         layoutParams.setMargins(24, 0, 24, 0);
         ButtonClickListener buttonClickListener = new ButtonClickListener();
 
@@ -69,7 +71,6 @@ public class TestChooseActivity extends BaseActivity implements TestChooseMvpVie
             boolean buttonEnabled = numberOfAttemptsRemaining > 0;
 
             if(buttonEnabled) {
-
                 Button button = new Button(this);
                 button.setAllCaps(false);
                 button.setText(buttonText);

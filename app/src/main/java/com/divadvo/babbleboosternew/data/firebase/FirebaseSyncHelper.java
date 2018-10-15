@@ -5,6 +5,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 
 import com.divadvo.babbleboosternew.Constants;
 import com.divadvo.babbleboosternew.data.local.Attempt;
@@ -56,6 +57,7 @@ public class FirebaseSyncHelper {
     public AtomicInteger tasksToF = new AtomicInteger(0);
     public AtomicInteger uploadingTaskCount = new AtomicInteger(0);
     private View progressBar;
+    private TextView tvUpdate;
 
     @Inject
     public FirebaseSyncHelper(Context context, StorageHelper storageHelper, DbManager dbManager) {
@@ -65,17 +67,19 @@ public class FirebaseSyncHelper {
     }
 
     public void downloadFromFirebase() {
-        downloadFromFirebase(null);
+        downloadFromFirebase(null, null);
     }
 
-    public void downloadFromFirebase(View progressBar) {
+    public void downloadFromFirebase(View progressBar, TextView update) {
         if (isDownloading())
             return;
 
         this.progressBar = progressBar;
+        this.tvUpdate = update;
         incrementAndLog();
 
-        Log.d("Download", "download: " + tasksToF.get());
+        if(update != null)
+            update.setText("Downloading Resources: " + tasksToF.get());
 
         ptask = db.collection("phonemeData").get();
 
@@ -83,7 +87,8 @@ public class FirebaseSyncHelper {
 
         ptask.addOnCompleteListener(task -> {
             decrementAndLog();
-            Log.d("Download", "download: " + tasksToF.get());
+            if(update != null)
+                update.setText("Downloading Resources: " + tasksToF.get());
             if (task.isSuccessful()) {
 //                progressView.tryStartingHomeButWaitUntilFinished();
                 for (DocumentSnapshot document : task.getResult()) {
@@ -162,9 +167,8 @@ public class FirebaseSyncHelper {
                 decrementAndLog();
                 downloadTasks.remove(t);
 
-                Log.d("LoginTest", "downloadFile: " + fileLocation.getName());
-//                tasks.remove(gsFileLocation);
-                // Local temp file has been created
+                if(tvUpdate != null)
+                    tvUpdate.setText("Downloading Resources: " + tasksToF.get());
 
                 if (!isDownloading())
                     progressBar.setVisibility(View.GONE);
@@ -310,12 +314,7 @@ public class FirebaseSyncHelper {
     }
 
     private void uploadDatabase() {
-//        progressView.displayStatus("Uploading results");
-
-
-//        CollectionReference collectionAttempts = db.collection("results").document(LocalUser.getInstance().username).collection("attempts");
         CollectionReference collectionAttempts = db.collection("results");
-
         List<Attempt> attemptsInDatabase = new ArrayList<>();
 
         collectionAttempts.get().addOnCompleteListener(task -> {
@@ -360,24 +359,14 @@ public class FirebaseSyncHelper {
     }
 
     private void uploadFile(StorageReference fileReference, File localFile, String fileFirebase) {
-//        tasksToFinish++;
         uploadingTaskCount.incrementAndGet();
-        Log.d(TAG, "uploadFile: " + uploadingTaskCount.get());
-
         StorageReference storageRef = firebaseStorage.getReference();
         storageRef.child(fileFirebase).getDownloadUrl().addOnSuccessListener(uri -> {
-
-            Log.d(TAG, "uploadFile: " + uploadingTaskCount.get());
-            // Got the download URL for 'users/me/profile.png'
-            Timber.i("File exists" + localFile);
-//            tasksToFinish--;
             uploadingTaskCount.decrementAndGet();
-//            tasks.remove(fileFirebase);
         }).addOnFailureListener(exception -> {
             Timber.e(exception);
             uploadingTaskCount.decrementAndGet();
             Log.d(TAG, "uploadFile: " + uploadingTaskCount.get());
-
             doesntExistSoUpload(fileReference, localFile, fileFirebase);
         });
     }
