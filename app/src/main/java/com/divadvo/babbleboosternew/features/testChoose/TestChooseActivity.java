@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 
 import com.divadvo.babbleboosternew.R;
+import com.divadvo.babbleboosternew.data.firebase.FirebaseSyncHelper;
 import com.divadvo.babbleboosternew.data.local.LocalUser;
 import com.divadvo.babbleboosternew.features.base.BaseActivity;
 import com.divadvo.babbleboosternew.features.recordVideo.RecordVideoActivity;
@@ -32,6 +33,9 @@ public class TestChooseActivity extends BaseActivity implements TestChooseMvpVie
     @BindView(R.id.layout_phoneme_test_buttons)
     LinearLayout linearLayout;
 
+    @Inject
+    FirebaseSyncHelper firebaseSyncHelper;
+
     private List<String> phonemes;
 
     public static Intent getStartIntent(Context context) {
@@ -45,10 +49,8 @@ public class TestChooseActivity extends BaseActivity implements TestChooseMvpVie
         phonemes = new ArrayList<>();
         phonemes.addAll(LocalUser.getInstance().getCurrentPhonemes());
         phonemes.addAll(LocalUser.getInstance().mastered_phonemes);
-
-//        phonemes = LocalUser.getInstance().getCurrentPhonemes();
-
         generateButtons();
+        firebaseSyncHelper.uploadEverything();
     }
 
     private void generateButtons() {

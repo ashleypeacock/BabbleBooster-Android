@@ -67,4 +67,5 @@ public class RecordVideoPresenter extends BasePresenter<RecordVideoMvpView> {
         String fullAttempt = String.format("%s_%s_%s_%s_%s", prefix, LocalUser.getInstance().username, phoneme, attemptNumber, timestamp);
         return fullAttempt;
     }
+
 }

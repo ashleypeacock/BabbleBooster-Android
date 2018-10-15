@@ -69,6 +69,8 @@ public class HomeActivity extends BaseActivity implements HomeMvpView {
         buttonTest.setOnClickListener(v -> startActivity(TestChooseActivity.getStartIntent(this)));
 
         buttonProgress.setOnClickListener(v -> startActivity(ProgressActivity.getStartIntent(this)));
+
+        firebaseSyncHelper.uploadEverything();
     }
 
     private void enableSomeButtons() {

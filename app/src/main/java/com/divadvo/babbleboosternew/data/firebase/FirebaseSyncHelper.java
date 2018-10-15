@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
@@ -53,6 +54,7 @@ public class FirebaseSyncHelper {
 
     public ArrayList<String> tasks = new ArrayList<>();
     public AtomicInteger tasksToF = new AtomicInteger(0);
+    public AtomicInteger uploadingTaskCount = new AtomicInteger(0);
     private View progressBar;
 
     @Inject
@@ -71,15 +73,17 @@ public class FirebaseSyncHelper {
             return;
 
         this.progressBar = progressBar;
-        Log.d("LoginTest", "downloadingPheneme: ");
-        tasksToF.incrementAndGet();
+        incrementAndLog();
+
+        Log.d("Download", "download: " + tasksToF.get());
 
         ptask = db.collection("phonemeData").get();
 
         ptask.addOnFailureListener(command -> progressBar.setVisibility(View.GONE));
 
         ptask.addOnCompleteListener(task -> {
-            tasksToF.decrementAndGet();
+            decrementAndLog();
+            Log.d("Download", "download: " + tasksToF.get());
             if (task.isSuccessful()) {
 //                progressView.tryStartingHomeButWaitUntilFinished();
                 for (DocumentSnapshot document : task.getResult()) {
@@ -148,14 +152,14 @@ public class FirebaseSyncHelper {
         long length = fileLocation.length();
         // TODO: check if doesn't exist
         if(!fileLocation.exists() || (fileLocation.length() == 0)) {
-            tasksToF.incrementAndGet();
+            incrementAndLog();
 
             FileDownloadTask t = objectReference.getFile(fileLocation);
 
             downloadTasks.add(t);
 
             t.addOnSuccessListener(taskSnapshot -> {
-                tasksToF.decrementAndGet();
+                decrementAndLog();
                 downloadTasks.remove(t);
 
                 Log.d("LoginTest", "downloadFile: " + fileLocation.getName());
@@ -166,6 +170,7 @@ public class FirebaseSyncHelper {
                     progressBar.setVisibility(View.GONE);
             }).addOnFailureListener(exception -> {
                 Timber.e(exception);
+                decrementAndLog();
                 fileLocation.delete();
                 Log.e("Error", "downloadFile: " + fileLocation + ", " + fileName, exception);
                 if (!isDownloading())
@@ -174,15 +179,30 @@ public class FirebaseSyncHelper {
         }
     }
 
+    public void incrementAndLog() {
+        tasksToF.incrementAndGet();
+        Log.d("Download", "incrementAndLog: " + tasksToF.get());
+    }
+
+    public void decrementAndLog() {
+        tasksToF.decrementAndGet();
+        Log.d("Download", "decrementAndLog: " + tasksToF.get());
+    }
+
+
     public boolean isDownloading() {
         return tasksToF.get() > 0;
     }
 
+    public boolean isUploading() {
+        return uploadingTaskCount.get() > 0;
+    }
+
     private void downloadReinforcement() {
-        tasksToF.incrementAndGet();
+        incrementAndLog();
         db.collection("users").document("default")
         .get().addOnCompleteListener(task -> {
-            tasksToF.decrementAndGet();
+            decrementAndLog();
             if (task.isSuccessful()) {
                 DocumentSnapshot document = task.getResult();
                 downloadReinforcementFiles(document);
@@ -206,11 +226,13 @@ public class FirebaseSyncHelper {
     }
 
     public void uploadEverything() {
-        uploadAttempts();
-        uploadTests();
-        uploadDatabase();
-        uploadMastered();
-        uploadSessions();
+        if(!isUploading()) {
+            uploadAttempts();
+            uploadTests();
+            uploadDatabase();
+            uploadMastered();
+            uploadSessions();
+        }
     }
 
     private void uploadAttempts() {
@@ -339,19 +361,23 @@ public class FirebaseSyncHelper {
 
     private void uploadFile(StorageReference fileReference, File localFile, String fileFirebase) {
 //        tasksToFinish++;
-//        tasksToF.incrementAndGet();
-//        tasks.add(fileFirebase);
+        uploadingTaskCount.incrementAndGet();
+        Log.d(TAG, "uploadFile: " + uploadingTaskCount.get());
 
         StorageReference storageRef = firebaseStorage.getReference();
-//        fileReference
         storageRef.child(fileFirebase).getDownloadUrl().addOnSuccessListener(uri -> {
+
+            Log.d(TAG, "uploadFile: " + uploadingTaskCount.get());
             // Got the download URL for 'users/me/profile.png'
             Timber.i("File exists" + localFile);
 //            tasksToFinish--;
-//            tasksToF.decrementAndGet();
+            uploadingTaskCount.decrementAndGet();
 //            tasks.remove(fileFirebase);
         }).addOnFailureListener(exception -> {
             Timber.e(exception);
+            uploadingTaskCount.decrementAndGet();
+            Log.d(TAG, "uploadFile: " + uploadingTaskCount.get());
+
             doesntExistSoUpload(fileReference, localFile, fileFirebase);
         });
     }
@@ -364,7 +390,7 @@ public class FirebaseSyncHelper {
 
 //        tasksToFinish++;
 //        tasks.add(fileFirebase);
-        tasksToF.incrementAndGet();
+        uploadingTaskCount.incrementAndGet();
         Timber.i("tasksToF: " + tasksToF.get());
 
         StorageReference storageRef = firebaseStorage.getReference();
@@ -376,9 +402,10 @@ public class FirebaseSyncHelper {
         uploadTask.addOnFailureListener(exception2 -> {
             // Handle unsuccessful uploads
             Timber.e("Upload failed", exception2);
+            uploadingTaskCount.decrementAndGet();
         }).addOnSuccessListener(taskSnapshot -> {
             // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
-            tasksToF.decrementAndGet();
+            uploadingTaskCount.decrementAndGet();
 //            tasks.remove(fileFirebase);
             Uri downloadUrl = taskSnapshot.getDownloadUrl();
             Timber.i("Upload successful", downloadUrl);

@@ -22,6 +22,7 @@ import com.afollestad.materialcamera.MaterialCamera;
 import com.crashlytics.android.Crashlytics;
 import com.divadvo.babbleboosternew.Constants;
 import com.divadvo.babbleboosternew.R;
+import com.divadvo.babbleboosternew.data.firebase.FirebaseSyncHelper;
 import com.divadvo.babbleboosternew.data.local.LocalUser;
 import com.divadvo.babbleboosternew.features.base.BaseActivity;
 import com.divadvo.babbleboosternew.features.choosePhonemes.ChoosePhonemesActivity;
@@ -46,6 +47,9 @@ public class RecordVideoActivity extends BaseActivity implements RecordVideoMvpV
 
 
     private final static int CAMERA_RQ = 6969;
+
+    @Inject
+    FirebaseSyncHelper firebaseSyncHelper;
 
     @BindView(R.id.button_yes_new)
     Button btnYes;

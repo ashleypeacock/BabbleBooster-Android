@@ -3,12 +3,14 @@ package com.divadvo.babbleboosternew.features.choosePhonemes;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.divadvo.babbleboosternew.R;
+import com.divadvo.babbleboosternew.data.firebase.FirebaseSyncHelper;
 import com.divadvo.babbleboosternew.data.local.LocalUser;
 import com.divadvo.babbleboosternew.features.base.BaseActivity;
 import com.divadvo.babbleboosternew.features.home.HomeActivity;
@@ -31,6 +33,9 @@ public class ChoosePhonemesActivity extends BaseActivity implements ChoosePhonem
     @BindView(R.id.layout_phoneme_buttons)
     LinearLayout linearLayout;
 
+    @Inject
+    FirebaseSyncHelper firebaseSyncHelper;
+
 
     private List<String> phonemes;
 
@@ -48,7 +53,9 @@ public class ChoosePhonemesActivity extends BaseActivity implements ChoosePhonem
         phonemes = LocalUser.getInstance().getCurrentPhonemes();
         // get from user
         generateButtons();
+        firebaseSyncHelper.uploadEverything();
     }
+
 
     private void generateButtons() {
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1.0f);
@@ -70,6 +77,8 @@ public class ChoosePhonemesActivity extends BaseActivity implements ChoosePhonem
             i++;
         }
     }
+
+
 
     @Override
     public int getLayout() {
