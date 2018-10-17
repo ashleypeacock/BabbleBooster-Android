@@ -101,6 +101,8 @@ public class FirebaseSyncHelper {
                     }
                 }
                 downloadReinforcement();
+                if(!isDownloading())
+                    progressBar.setVisibility(View.GONE);
                 Log.d("LoginTest", "finished downloading phenomes: ");
             } else {
                 progressBar.setVisibility(View.GONE);
@@ -191,6 +193,8 @@ public class FirebaseSyncHelper {
     public void decrementAndLog() {
         tasksToF.decrementAndGet();
         Log.d("Download", "decrementAndLog: " + tasksToF.get());
+//        if(!isDownloading())
+//            progressBar.setVisibility(View.GONE);
     }
 
 
