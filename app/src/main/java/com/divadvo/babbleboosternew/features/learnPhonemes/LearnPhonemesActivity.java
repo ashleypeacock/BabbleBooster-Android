@@ -6,11 +6,14 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.MediaController;
 import android.widget.Toast;
 import android.widget.VideoView;
 
@@ -80,6 +83,7 @@ public class LearnPhonemesActivity extends BaseActivity implements LearnPhonemes
     Storage storage;
 
     String phonemeDirectoryPath;
+    private String TAG = "LearningPhonemesActivity";
 
 
     public static Intent getStartIntent(Context context, String phoneme, boolean goToFinalVideo) {
@@ -92,6 +96,7 @@ public class LearnPhonemesActivity extends BaseActivity implements LearnPhonemes
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
 
         phoneme = getIntent().getStringExtra(EXTRA_PHONEME);
         if (phoneme == null) {
@@ -107,11 +112,28 @@ public class LearnPhonemesActivity extends BaseActivity implements LearnPhonemes
         initListeners();
         getImagesAndVideo();
         showCurrentImage(true);
+    }
+
+
+
+    @Override
+    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
 
         // Goes to last video
         // After TRY_AGAIN button in the RecordVideoActivity was pressed
         if(getIntent().getBooleanExtra(GO_TO_FINAL_VIDEO, false)) {
-            playLastVideo();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(500);
+                        playLastVideo();
+                    }catch(Exception e) {
+
+                    }
+                }
+            });
         }
     }
 
@@ -186,7 +208,6 @@ public class LearnPhonemesActivity extends BaseActivity implements LearnPhonemes
     }
 
     private void setCurrentVideo() {
-        phonemeVideo.stopPlayback();
         String path = videosToDisplay.get(currentVideoIndex);
 
         if (currentVideoIndex == videosToDisplay.size() - 1) {
@@ -196,10 +217,24 @@ public class LearnPhonemesActivity extends BaseActivity implements LearnPhonemes
 
         phonemeVideo.setVideoPath(path);
         phonemeVideo.requestFocus();
-        phonemeVideo.start();
     }
 
     private void playCurrentVideo() {
+        phonemeVideo.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+            @Override
+            public boolean onError(MediaPlayer mediaPlayer, int i, int i1) {
+                Log.e(TAG, "onError: ");
+                return false;
+            }
+        });
+
+        phonemeVideo.setOnInfoListener(new MediaPlayer.OnInfoListener() {
+            @Override
+            public boolean onInfo(MediaPlayer mediaPlayer, int i, int i1) {
+                Log.d(TAG, "onInfo: " + i + ", " + i1);
+                return false;
+            }
+        });
         // The videos will play in a loop
 //        phonemeVideo.setOnPreparedListener(mp -> mp.setLooping(true));
         if(currentVideoIndex == videosToDisplay.size() - 1) {
@@ -217,7 +252,20 @@ public class LearnPhonemesActivity extends BaseActivity implements LearnPhonemes
                 phonemeVideo.start();
             });
         }
-        phonemeVideo.start();
+
+        phonemeVideo.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mediaPlayer) {
+                runOnUiThread(() -> {
+                    try {
+                        Thread.sleep(500);
+                        phonemeVideo.start();
+                    }catch(Exception e) {
+
+                    }
+                });
+            }
+        });
     }
 
     /**
@@ -230,6 +278,7 @@ public class LearnPhonemesActivity extends BaseActivity implements LearnPhonemes
         if (currentVideoIndex == videosToDisplay.size()) {
             currentVideoIndex = 0;
             setCurrentVideo();
+            phonemeVideo.start();
 
             // Show images
             phonemeVideo.setVisibility(View.INVISIBLE);
@@ -308,7 +357,7 @@ public class LearnPhonemesActivity extends BaseActivity implements LearnPhonemes
     private void getAudio() {
         String regex = "([^\\s]+(\\.(?i)(mp3|wav))$)";
         String path = phonemeDirectoryPath + File.separator + "final";
-        ;
+
         List<File> files = storage.getFiles(path, regex);
 
         try {
