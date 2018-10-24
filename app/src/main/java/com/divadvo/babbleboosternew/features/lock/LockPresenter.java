@@ -37,6 +37,7 @@ public class LockPresenter extends BasePresenter<LockMvpView> {
             getView().loginSuccessfulOffline(password);
         } else {
             getView().wrongPassword();
+            getView().getLoginButton().setText("Login");
         }
     }
 
@@ -72,6 +73,7 @@ public class LockPresenter extends BasePresenter<LockMvpView> {
                 afterSignedInOnline(password);
             } else {
                 Timber.i("Failed");
+                getView().getLoginButton().setText("Login");
             }
         });
     }

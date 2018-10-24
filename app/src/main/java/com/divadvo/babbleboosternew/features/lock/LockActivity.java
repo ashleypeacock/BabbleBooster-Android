@@ -64,6 +64,7 @@ public class LockActivity extends BaseActivity implements LockMvpView {
 
         buttonLogin.setOnClickListener(v -> {
             buttonLogin.setEnabled(false);
+            buttonLogin.setText("Logging in...");
             enteredPassword = editTextPassword.getText().toString();
             if(!enteredPassword.isEmpty()) {
                 if (isNetworkConnected(this))

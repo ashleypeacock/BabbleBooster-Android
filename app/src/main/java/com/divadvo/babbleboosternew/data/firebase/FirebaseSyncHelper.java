@@ -85,6 +85,8 @@ public class FirebaseSyncHelper {
 
         ptask.addOnFailureListener(command -> progressBar.setVisibility(View.GONE));
 
+        downloadReinforcement();
+
         ptask.addOnCompleteListener(task -> {
             decrementAndLog();
             if(update != null)
@@ -100,7 +102,7 @@ public class FirebaseSyncHelper {
                         downloadPhonemeData(document);
                     }
                 }
-                downloadReinforcement();
+                //downloadReinforcement();
                 if(!isDownloading())
                     progressBar.setVisibility(View.GONE);
                 Log.d("LoginTest", "finished downloading phenomes: ");
@@ -207,9 +209,10 @@ public class FirebaseSyncHelper {
     }
 
     private void downloadReinforcement() {
+
         incrementAndLog();
-        db.collection("users").document("default")
-        .get().addOnCompleteListener(task -> {
+
+        db.collection("users").document("default").get().addOnCompleteListener(task -> {
             decrementAndLog();
             if (task.isSuccessful()) {
                 DocumentSnapshot document = task.getResult();
@@ -217,6 +220,8 @@ public class FirebaseSyncHelper {
             } else {
                 Timber.d( "Error getting documents.", task.getException());
             }
+            if (tasksToF.intValue() == 0 && !isDownloading())
+                progressBar.setVisibility(View.GONE);
         });
     }
 
