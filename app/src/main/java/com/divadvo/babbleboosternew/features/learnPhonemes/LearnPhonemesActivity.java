@@ -111,7 +111,6 @@ public class LearnPhonemesActivity extends BaseActivity implements LearnPhonemes
 
         initListeners();
         getImagesAndVideo();
-        showCurrentImage(true);
     }
 
 
@@ -127,13 +126,15 @@ public class LearnPhonemesActivity extends BaseActivity implements LearnPhonemes
                 @Override
                 public void run() {
                     try {
-                        Thread.sleep(500);
+                        Thread.sleep(200);
                         playLastVideo();
                     }catch(Exception e) {
 
                     }
                 }
             });
+        } else {
+            showCurrentImage(true);
         }
     }
 
@@ -193,14 +194,14 @@ public class LearnPhonemesActivity extends BaseActivity implements LearnPhonemes
     private void goToNextImage() {
         currentImageIndex++;
         if (currentImageIndex == imageFilesToDisplay.size()) {
+            setCurrentVideo();
             currentImageIndex = 0;
-            showCurrentImage(false);
-
+            //showCurrentImage(false);
             // Show videos
             phonemeVideo.setVisibility(View.VISIBLE);
             phonemeImage.setVisibility(View.INVISIBLE);
-            setCurrentVideo();
             playCurrentVideo();
+            showCurrentImage(false);
         } else {
             showCurrentImage(true);
         }
@@ -256,10 +257,12 @@ public class LearnPhonemesActivity extends BaseActivity implements LearnPhonemes
         phonemeVideo.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mediaPlayer) {
+                Log.d(TAG, "onPrepared: " + phonemeVideo.getBufferPercentage() + "," + phonemeVideo.isActivated());
                 runOnUiThread(() -> {
                     try {
-                        Thread.sleep(500);
+                        Thread.sleep(700);
                         phonemeVideo.start();
+                        Log.d(TAG, "onPrepared: " + phonemeVideo.getBufferPercentage() + "," + phonemeVideo.isActivated());
                     }catch(Exception e) {
 
                     }

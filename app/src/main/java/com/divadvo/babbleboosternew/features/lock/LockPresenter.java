@@ -88,6 +88,7 @@ public class LockPresenter extends BasePresenter<LockMvpView> {
 //        firebaseSyncHelper.setProgressView(this);
         Log.d("LoginTest", "savedUserInLocal: ");
         getView().getLoginButton().setEnabled(false);
+        getView().getLoginButton().setText("Logging in...");
         loginOffline(password);
     }
 
